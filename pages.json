@@ -150,7 +150,19 @@
 		"pages": [{
 			"path": "code/list",
 			"style": {
-				"navigationBarTitleText": "股票代码",
+				"navigationBarTitleText": "股票代码管理",
+				"navigationStyle": "default"
+			}
+		}, {
+			"path": "code/add",
+			"style": {
+				"navigationBarTitleText": "新增股票代码",
+				"navigationStyle": "default"
+			}
+		}, {
+			"path": "code/edit",
+			"style": {
+				"navigationBarTitleText": "修改股票代码",
 				"navigationStyle": "default"
 			}
 		}]
