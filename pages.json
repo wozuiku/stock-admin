@@ -145,6 +145,15 @@
 				"navigationBarTitleText": "表格"
 			}
 		}]
+	}, {
+		"root": "pages/stock",
+		"pages": [{
+			"path": "code/list",
+			"style": {
+				"navigationBarTitleText": "股票代码",
+				"navigationStyle": "default"
+			}
+		}]
 	}],
 	"globalStyle": {
 		"navigationStyle": "custom",

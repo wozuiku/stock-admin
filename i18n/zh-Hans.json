@@ -99,5 +99,10 @@
 		"table": {
 			"title": "表格"
 		}
+	},
+	"stock": {
+		"text": {
+			"stockCode": "股票代码"
+		}
 	}
 }
