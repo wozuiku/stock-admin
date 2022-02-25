@@ -12,7 +12,7 @@
 		</view>
 		
 		<view class="uni-container">
-			<unicloud-db ref="udb" collection="stock" field="code,name, exchange, source_code" :where="where" 
+			<unicloud-db ref="udb" collection="stock-code" field="code,name, exchange, source_code" :where="where" 
 			page-data="replace" :getcount="true" :page-size="options.pageSize" :page-current="options.pageCurrent"
 			v-slot:default="{data, pagination, loading, error, options}" 
 		    :options="options" @load="onqueryload">

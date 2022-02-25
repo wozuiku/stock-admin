@@ -3,10 +3,15 @@ import store from './store'
 import plugin from './js_sdk/uni-admin/plugin'
 import messages from './i18n/index.js'
 
+
 const lang = uni.getLocale()
 // #ifndef VUE3
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
+
+import http from '@/common/request/index'
+Vue.prototype.$http = http;
+
 Vue.config.productionTip = false
 Vue.use(VueI18n)
 // 通过选项创建 VueI18n 实例

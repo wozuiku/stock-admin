@@ -242,6 +242,7 @@
 		},
 		methods: {
 			onqueryload(data) {
+				console.log('onqueryload:', data);
 				for (var i = 0; i < data.length; i++) {
 					let item = data[i]
 					const roleArr = item.role.map(item => item.role_name)
@@ -275,6 +276,7 @@
 			search() {
 				const newWhere = this.getWhere()
 				this.where = newWhere
+				console.log('search:', this.where);
 				// 下一帧拿到查询条件
 				this.$nextTick(() => {
 					this.loadData()

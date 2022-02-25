@@ -146,7 +146,7 @@
 			}
 		}]
 	}, {
-		"root": "pages/stock",
+		"root": "pages/data",
 		"pages": [{
 			"path": "code/list",
 			"style": {
@@ -163,6 +163,18 @@
 			"path": "code/edit",
 			"style": {
 				"navigationBarTitleText": "修改股票代码",
+				"navigationStyle": "default"
+			}
+		}, {
+			"path": "history/list",
+			"style": {
+				"navigationBarTitleText": "历史数据管理",
+				"navigationStyle": "default"
+			}
+		}, {
+			"path": "now/list",
+			"style": {
+				"navigationBarTitleText": "实时数据管理",
 				"navigationStyle": "default"
 			}
 		}]
