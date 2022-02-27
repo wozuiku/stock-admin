@@ -55,3 +55,10 @@
 	@import '@/common/uni.css';
 	@import '@/common/uni-icons.css';
 </style>
+<style lang="scss">
+	/*每个页面公共css */
+	@import 'uni_modules/uview-ui/index.scss';
+	@import 'uni_modules/uview-ui/iconfont.css';
+	@import "uni_modules/colorui/main.css";
+	@import "uni_modules/colorui/icon.css";
+</style>

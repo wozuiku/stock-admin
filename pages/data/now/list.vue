@@ -6,8 +6,8 @@
 					:placeholder="$t('common.placeholder.query')" />
 				<button class="uni-button" type="default" size="mini"
 					@click="search">{{$t('common.button.search')}}</button>
-				<button class="uni-button" type="primary" size="mini"
-					@click="sync">{{$t('common.button.sync')}}</button>
+				<button class="uni-button" type="primary" size="mini" :loading="syncLoading"
+					@click="sync">{{syncBtnText}}</button>
 				<button class="uni-button" type="warn" size="mini"
 					@click="delBatch">{{$t('common.button.batchDelete')}}</button>
 				<!-- #ifdef H5 -->
@@ -18,26 +18,26 @@
 				<!-- #endif -->
 			</view>
 		</view>
-		
+
 		<view class="uni-container">
-			<unicloud-db ref="udb" collection="stock-data-now" 
-			field="time,code,name,price,high,low,open,pre_close,bargain_volume,bargain_amount"
-			:where="where" :getcount="true" :page-size="options.pageSize" :page-current="options.pageCurrent"
-			v-slot:default="{data,pagination, loading, error, options}" >
+			<unicloud-db ref="udb" collection="stock-data-now"
+				field="time,code,name,price,high,low,open,pre_close,bargain_volume,bargain_amount" :where="where"
+				:getcount="true" :page-size="options.pageSize" :page-current="options.pageCurrent"
+				v-slot:default="{data,pagination, loading, error, options}">
 				<uni-table ref="table" :loading="loading" :emptyText="error.message || $t('common.empty')" border stripe
 					type="selection" @selection-change="selectionChange">
-					
+
 					<uni-tr>
-						<uni-th align="center" >时间</uni-th>
-						<uni-th align="center" >代码</uni-th>
-						<uni-th align="center" >名称</uni-th>
-						<uni-th align="center" >价格</uni-th>
-						<uni-th align="center" >最高价</uni-th>
-						<uni-th align="center" >最低价</uni-th>
-						<uni-th align="center" >开盘价</uni-th>
-						<uni-th align="center" >昨收价</uni-th>
-						<uni-th align="center" >成交量</uni-th>
-						<uni-th align="center" >成交额</uni-th>
+						<uni-th align="center">时间</uni-th>
+						<uni-th align="center">代码</uni-th>
+						<uni-th align="center">名称</uni-th>
+						<uni-th align="center">价格</uni-th>
+						<uni-th align="center">最高价</uni-th>
+						<uni-th align="center">最低价</uni-th>
+						<uni-th align="center">开盘价</uni-th>
+						<uni-th align="center">昨收价</uni-th>
+						<uni-th align="center">成交量</uni-th>
+						<uni-th align="center">成交额</uni-th>
 						<uni-th align="center">操作</uni-th>
 					</uni-tr>
 					<uni-tr v-for="(item,index) in data" :key="index">
@@ -75,16 +75,64 @@
 						:total="pagination.count" @change="onPageChanged" />
 				</view>
 			</unicloud-db>
+
+
+
+			<view class="cu-modal" :class="showDelModal?'show':''">
+				<view class="cu-dialog">
+					<view class="cu-bar bg-white justify-end">
+						<view class="content">批量删除</view>
+						<view class="action" @tap="hideModal">
+							<text class="cuIcon-close text-red"></text>
+						</view>
+					</view>
+					<view class="padding-xl">
+						<form>
+							<view class="cu-form-group">
+								<view class="title">选择日期</view>
+								<picker mode="date" :value="delDate" start="2015-09-01" end="2020-09-01"
+									@change="delDateChange">
+									<view class="picker">
+										{{delDate}}
+									</view>
+								</picker>
+
+							</view>
+						</form>
+					</view>
+					<view class="cu-bar bg-white">
+
+						<view class="del-modal-action">
+							<view class="left">
+								<view class="action">
+									<button class="cu-btn line-red" :loading="delAllLoading"
+										@click="delDataAll">{{delAllBtnText}}</button>
+									
+								
+
+								</view>
+							</view>
+							<view class="right">
+								<view class="action">
+									<button class="cu-btn line-blue" @tap="hideModal">取消</button>
+									<button class="cu-btn bg-blue margin-left" @tap="delDatabatch">按日期删除</button>
+								</view>
+							</view>
+						</view>
+
+					</view>
+				</view>
+			</view>
+
 		</view>
 	</view>
 </template>
 
 <script>
-	
 	// 分页配置
 	const pageSize = 10
 	const pageCurrent = 1
-	
+
 	export default {
 		data() {
 			return {
@@ -93,7 +141,15 @@
 				selectedIndexs: [],
 				pageSizeIndex: 0,
 				pageSizeOption: [10, 20, 50, 100, 500],
-				
+
+				syncLoading: false,
+				syncBtnText: '同步',
+
+				showDelModal: false,
+				delDate: '2018-12-25',
+				delAllLoading: false,
+				delAllBtnText: '全部删除',
+
 				options: {
 					pageSize,
 					pageCurrent,
@@ -118,7 +174,7 @@
 						]
 					},
 				},
-				
+
 				exportExcel: {
 					"filename": "stock-now-data.xls",
 					"type": "xls",
@@ -138,7 +194,7 @@
 				exportExcelData: [],
 			}
 		},
-		
+
 		watch: {
 			pageSizeIndex: {
 				immediate: true,
@@ -153,7 +209,7 @@
 		},
 
 		methods: {
-			
+
 			search() {
 				const newWhere = this.getWhere()
 				this.where = newWhere
@@ -163,29 +219,64 @@
 					this.loadData()
 				})
 			},
-			
+
 			sync() {
+				this.syncLoading = true
+				this.syncBtnText = '同步中...'
 				uniCloud.callFunction({
-					name: 'data_cf'
-				}).then(res => {
-					//console.log(res);
-				});
+						name: 'data_cf',
+						data: {
+							type: 'sync'
+						}
+					})
+					.then(res => {
+						console.log('sync res:', res);
+						this.syncLoading = false
+						this.syncBtnText = '同步'
+						this.search()
+					});
 			},
-			
-			delBatch(){
-				uni.showModal({
-				    title: '提示',
-				    content: '这是一个模态弹窗',
-				    success: function (res) {
-				        if (res.confirm) {
-				            console.log('用户点击确定');
-				        } else if (res.cancel) {
-				            console.log('用户点击取消');
-				        }
-				    }
-				});
+
+			delBatch() {
+				this.showDelModal = true
 			},
-			
+
+			hideModal() {
+				this.showDelModal = false
+			},
+
+			delDateChange() {
+
+			},
+
+			delDataAll() {
+				this.delAllLoading = true
+				this.delAllBtnText = '删除中...'
+				uniCloud.callFunction({
+						name: 'data_cf',
+						data: {
+							type: 'delAll'
+						}
+					})
+					.then(res => {
+						console.log('delDataAll res:', res);
+						
+						setTimeout(() => {
+						    this.delAllLoading = false
+						    this.delAllBtnText = '全部删除'
+							this.search()
+						}, 3000)
+						
+						//this.showDelModal = false
+						//
+					});
+			},
+
+			delDatabatch() {
+
+			},
+
+
 			getWhere() {
 				const query = this.query.trim()
 				if (!query) {
@@ -194,22 +285,22 @@
 				const queryRe = new RegExp(query, 'i')
 				return dbSearchFields.map(name => queryRe + '.test(' + name + ')').join(' || ')
 			},
-			
+
 			loadData(clear = true) {
 				this.$refs.udb.loadData({
 					clear
 				})
 			},
-			
+
 			// 多选
 			selectionChange(e) {
 				this.selectedIndexs = e.detail.index
 			},
-			
+
 			changeSize(e) {
 				this.pageSizeIndex = e.detail.value
 			},
-			
+
 			onPageChanged(e) {
 				this.selectedIndexs.length = 0
 				this.$refs.table.clearSelection()
@@ -221,5 +312,21 @@
 	}
 </script>
 
-<style>
+<style lang="scss" scoped>
+	.del-modal-action {
+		display: flex;
+		justify-content: space-between;
+		width: 100%;
+
+		.left {
+			flex: 40%;
+		}
+
+		.right {
+			flex: 60%;
+			display: flex;
+			justify-content: flex-end;
+		}
+
+	}
 </style>

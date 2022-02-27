@@ -2,6 +2,7 @@ import App from './App'
 import store from './store'
 import plugin from './js_sdk/uni-admin/plugin'
 import messages from './i18n/index.js'
+import uView from '@/uni_modules/uview-ui'
 
 
 const lang = uni.getLocale()
@@ -14,6 +15,7 @@ Vue.prototype.$http = http;
 
 Vue.config.productionTip = false
 Vue.use(VueI18n)
+Vue.use(uView);
 // 通过选项创建 VueI18n 实例
 const i18n = new VueI18n({
   locale: lang, // 设置地区
