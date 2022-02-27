@@ -7,6 +7,7 @@ exports.main = async (event, context) => {
 	//event为客户端上传的参数
 	console.log('event : ', event)
 	const type = event.type
+	const date = event.date
 	
 	if(type == 'sync'){
 		let res = {},
@@ -46,8 +47,10 @@ exports.main = async (event, context) => {
 			//将实时数据添加到云数据库
 			await insertDataNow(dataNowDict)
 		}
+	}else if(type == 'delDate'){
+		deleteDate(date)
 	}else if(type == 'delAll'){
-		deleteDataAll()
+		deleteAll()
 	}
 	
 	
@@ -114,18 +117,19 @@ exports.main = async (event, context) => {
 		let total_len = res.data.length
 		let dataNow = res.data.substr(start_len, total_len - start_len - 2)
 
-		//console.log('dataNow:', JSON.parse(dataNow));
-
 		return JSON.parse(dataNow)
 	}
 
 	async function insertDataNow(dataNowDict) {
 		let dictItem = {},
 			dataNowItem = {},
-		    dataNowList = []
+		    dataNowList = [],
+			timeStr
         
+		
 		for (let key in dataNowDict) {
 			dataNowItem = {}
+			timeStr = ''
 			dictItem = dataNowDict[key]
 			dataNowItem.code = dictItem.code
 			dataNowItem.name = dictItem.name
@@ -136,18 +140,23 @@ exports.main = async (event, context) => {
 			dataNowItem.pre_close = dictItem.yestclose
 			dataNowItem.bargain_volume = dictItem.volume
 			dataNowItem.bargain_amount = dictItem.turnover
-			dataNowItem.time = dictItem.time
-			//console.log('dataNowItem:', dataNowItem);
+			timeStr = dictItem.time.replace(/\//g, '-')
+			dataNowItem.time = timeStr
+			dataNowItem.date = timeStr.substr(0, 10)
 			dataNowList.push(dataNowItem)
 		}
-		
-		//console.log('dataNowList:', dataNowList);
 		
 		await db.collection('stock-data-now').add(dataNowList)
 	}
 	
 	
-	async function deleteDataAll(){
+	async function deleteDate(date){
+		let res = await db.collection('stock-data-now').where({
+		  date: dbCmd.eq(date)
+		}).remove()
+	}
+	
+	async function deleteAll(){
 		let res = await db.collection('stock-data-now').where({
 		  _id: dbCmd.exists(true)
 		}).remove()

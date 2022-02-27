@@ -21,7 +21,7 @@
 
 		<view class="uni-container">
 			<unicloud-db ref="udb" collection="stock-data-now"
-				field="time,code,name,price,high,low,open,pre_close,bargain_volume,bargain_amount" :where="where"
+				field="time,date,code,name,price,high,low,open,pre_close,bargain_volume,bargain_amount" :where="where"
 				:getcount="true" :page-size="options.pageSize" :page-current="options.pageCurrent"
 				v-slot:default="{data,pagination, loading, error, options}">
 				<uni-table ref="table" :loading="loading" :emptyText="error.message || $t('common.empty')" border stripe
@@ -29,6 +29,7 @@
 
 					<uni-tr>
 						<uni-th align="center">时间</uni-th>
+						<!-- <uni-th align="center">日期</uni-th> -->
 						<uni-th align="center">代码</uni-th>
 						<uni-th align="center">名称</uni-th>
 						<uni-th align="center">价格</uni-th>
@@ -42,6 +43,7 @@
 					</uni-tr>
 					<uni-tr v-for="(item,index) in data" :key="index">
 						<uni-td align="center">{{item.time}}</uni-td>
+						<!-- <uni-td align="center">{{item.date}}</uni-td> -->
 						<uni-td align="center">{{item.code}}</uni-td>
 						<uni-td align="center">{{item.name}}</uni-td>
 						<uni-td align="center">{{item.price}}</uni-td>
@@ -90,7 +92,7 @@
 						<form>
 							<view class="cu-form-group">
 								<view class="title">选择日期</view>
-								<picker mode="date" :value="delDate" start="2015-09-01" end="2020-09-01"
+								<picker mode="date" :value="delDate"
 									@change="delDateChange">
 									<view class="picker">
 										{{delDate}}
@@ -107,15 +109,16 @@
 								<view class="action">
 									<button class="cu-btn line-red" :loading="delAllLoading"
 										@click="delDataAll">{{delAllBtnText}}</button>
-									
-								
+
+
 
 								</view>
 							</view>
 							<view class="right">
 								<view class="action">
 									<button class="cu-btn line-blue" @tap="hideModal">取消</button>
-									<button class="cu-btn bg-blue margin-left" @tap="delDatabatch">按日期删除</button>
+									<button class="cu-btn bg-blue margin-left" :loading="delDateLoading"
+										@click="delDataDate">{{delDateBtnText}}</button>
 								</view>
 							</view>
 						</view>
@@ -129,7 +132,10 @@
 </template>
 
 <script>
-	// 分页配置
+	
+	const dbSearchFields = ['time', 'date', 'code', 'name', 'price', 'high', 'low', 'open', 'pre_close', 'item.bargain_volume', 'bargain_amount'] // 支持模糊搜索的字段列表
+	
+
 	const pageSize = 10
 	const pageCurrent = 1
 
@@ -146,7 +152,9 @@
 				syncBtnText: '同步',
 
 				showDelModal: false,
-				delDate: '2018-12-25',
+				delDate: this.getDate(),
+				delDateLoading: false,
+				delDateBtnText: '按日期删除',
 				delAllLoading: false,
 				delAllBtnText: '全部删除',
 
@@ -245,13 +253,26 @@
 				this.showDelModal = false
 			},
 
-			delDateChange() {
-
+			
+			
+			getDate() {
+				const date = new Date();
+				let year = date.getFullYear();
+				let month = date.getMonth() + 1;
+				let day = date.getDate();
+			
+				month = month > 9 ? month : '0' + month;
+				day = day > 9 ? day : '0' + day;
+				return `${year}-${month}-${day}`;
+			},
+			
+			delDateChange: function(e) {
+			    this.delDate = e.target.value
 			},
 
 			delDataAll() {
 				this.delAllLoading = true
-				this.delAllBtnText = '删除中...'
+				this.delAllBtnText = '删除...'
 				uniCloud.callFunction({
 						name: 'data_cf',
 						data: {
@@ -260,19 +281,37 @@
 					})
 					.then(res => {
 						console.log('delDataAll res:', res);
-						
+
 						setTimeout(() => {
-						    this.delAllLoading = false
-						    this.delAllBtnText = '全部删除'
+							this.delAllLoading = false
+							this.delAllBtnText = '全部删除'
 							this.search()
-						}, 3000)
-						
+						}, 1000)
+
 						//this.showDelModal = false
 						//
 					});
 			},
 
-			delDatabatch() {
+			delDataDate() {
+				console.log('this.delDate:', this.delDate);
+				this.delDateLoading = true
+				this.delDateBtnText = '删除...'
+				uniCloud.callFunction({
+						name: 'data_cf',
+						data: {
+							type: 'delDate',
+							date: this.delDate
+						}
+					})
+					.then(res => {
+						console.log('delDate res:', res);
+						setTimeout(() => {
+							this.delDateLoading = false
+							this.delDateBtnText = '按日期删除'
+							this.search()
+						}, 200)
+					});
 
 			},
 
@@ -308,6 +347,10 @@
 					current: e.current
 				})
 			},
+
+			
+					
+					
 		}
 	}
 </script>
