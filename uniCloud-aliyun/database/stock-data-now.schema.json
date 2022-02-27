@@ -1,0 +1,48 @@
+{
+	"bsonType": "object",
+	"required": [],
+	"permission": {
+		"read": true,
+		"create": true,
+		"update": true,
+		"delete": true
+	},
+	"properties": {
+		"_id": {
+			"description": "ID，系统自动生成"
+		},
+		"batch": {
+			"description": "batch"
+		},
+		"time": {
+			"description": "time"
+		},
+		"code": {
+			"description": "code"
+		},
+		"name": {
+			"description": "name"
+		},
+		"price": {
+			"description": "price"
+		},
+		"high": {
+			"description": "high"
+		},
+		"low": {
+			"description": "low"
+		},
+		"open": {
+			"description": "open"
+		},
+		"pre_close": {
+			"description": "pre_close"
+		},
+		"bargain_volume": {
+			"description": "bargain_volume"
+		},
+		"bargain_amount": {
+			"description": "bargain_amount"
+		}
+	}
+}
