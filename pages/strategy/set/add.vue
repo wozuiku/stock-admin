@@ -1,11 +1,14 @@
 <template>
 	<view class="uni-container">
 		<uni-forms ref="form" v-model="formData" @submit="submit">
-			<uni-forms-item name="code" label="策略代码" required>
+			<uni-forms-item name="code" label="策略代码">
 				<uni-easyinput v-model="formData.code" :clearable="false" placeholder="请输入策略代码" />
 			</uni-forms-item>
-			<uni-forms-item name="name" label="策略名称" required>
+			<uni-forms-item name="name" label="策略名称">
 				<uni-easyinput v-model="formData.name" :clearable="false" placeholder="请输入策略名称" />
+			</uni-forms-item>
+			<uni-forms-item name="no" label="编号">
+				<uni-easyinput v-model="formData.no" :clearable="false" placeholder="请输入编号" />
 			</uni-forms-item>
 			<uni-forms-item name="field" label="字段">
 				<uni-easyinput v-model="formData.field" :clearable="false" placeholder="请输入字段" />
@@ -37,6 +40,7 @@
 				formData: {
 					code: '',
 					name: '',
+					no: '',
 					field: '',
 					value: '',
 					operator: ''

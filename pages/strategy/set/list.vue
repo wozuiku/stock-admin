@@ -15,7 +15,7 @@
 
 		<view class="uni-container">
 			<unicloud-db ref="udb" collection="stock-strategy-set"
-				field="code,name,field,value,operator" :where="where"
+				field="code,name,no,field,value,operator" :where="where"
 				:getcount="true" :page-size="options.pageSize" :page-current="options.pageCurrent"
 				v-slot:default="{data,pagination, loading, error, options}">
 				<uni-table ref="table" :loading="loading" :emptyText="error.message || $t('common.empty')" border stripe
@@ -24,6 +24,7 @@
 					<uni-tr>
 						<uni-th align="center">策略代码</uni-th>
 						<uni-th align="center">策略名称</uni-th>
+						<uni-th align="center">编号</uni-th>
 						<uni-th align="center">字段</uni-th>
 						<uni-th align="center">值</uni-th>
 						<uni-th align="center">操作符</uni-th>
@@ -32,6 +33,7 @@
 					<uni-tr v-for="(item,index) in data" :key="index">
 						<uni-td align="center">{{item.code}}</uni-td>
 						<uni-td align="center">{{item.name}}</uni-td>
+						<uni-td align="center">{{item.no}}</uni-td>
 						<uni-td align="center">{{item.field}}</uni-td>
 						<uni-td align="center">{{item.value}}</uni-td>
 						<uni-td align="center">{{item.operator}}</uni-td>
@@ -65,7 +67,7 @@
 </template>
 
 <script>
-	const dbSearchFields = ['code', 'name', 'field', 'value', 'operator'] // 支持模糊搜索的字段列表
+	const dbSearchFields = ['code', 'name', 'no', 'field', 'value', 'operator'] // 支持模糊搜索的字段列表
 	
 	const pageSize = 10
 	const pageCurrent = 1
@@ -199,6 +201,14 @@
 			loadData(clear = true) {
 				this.$refs.udb.loadData({
 					clear
+				})
+			},
+			
+			confirmDelete(id) {
+				this.$refs.udb.remove(id, {
+					success: (res) => {
+						this.$refs.table.clearSelection()
+					}
 				})
 			},
 
