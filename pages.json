@@ -207,12 +207,37 @@
 				"navigationStyle": "default"
 			}
 		}, {
+			"path": "execute/add",
+			"style": {
+				"navigationBarTitleText": "执行-新增",
+				"navigationStyle": "default"
+			}
+		}, {
+			"path": "execute/edit",
+			"style": {
+				"navigationBarTitleText": "执行-编辑",
+				"navigationStyle": "default"
+			}
+		}, {
 			"path": "result/list",
 			"style": {
 				"navigationBarTitleText": "结果-列表",
 				"navigationStyle": "default"
 			}
-		}]
+		}, {
+			"path": "result/add",
+			"style": {
+				"navigationBarTitleText": "结果-新增",
+				"navigationStyle": "default"
+			}
+		}, {
+			"path": "result/edit",
+			"style": {
+				"navigationBarTitleText": "结果-编辑",
+				"navigationStyle": "default"
+			}
+		}
+		]
 	}],
 	"globalStyle": {
 		"navigationStyle": "custom",

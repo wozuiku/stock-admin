@@ -1,23 +1,23 @@
 <template>
 	<view class="uni-container">
 		<uni-forms ref="form" v-model="formData" @submit="submit">
-			<uni-forms-item name="code" label="策略代码" required>
-				<uni-easyinput v-model="formData.code" :clearable="true" placeholder="请输入策略代码" />
+			<uni-forms-item name="batch" label="批次" required>
+				<uni-easyinput v-model="formData.batch" :clearable="true" placeholder="请输入批次" />
 			</uni-forms-item>
-			<uni-forms-item name="name" label="策略名称" required>
-				<uni-easyinput v-model="formData.name" :clearable="true" placeholder="请输入策略名称" />
+			<uni-forms-item name="strategy_code" label="策略代码" required>
+				<uni-easyinput v-model="formData.strategy_code" :clearable="true" placeholder="请输入策略代码" />
 			</uni-forms-item>
-			<uni-forms-item name="no" label="编号" required>
-				<uni-easyinput v-model="formData.no" :clearable="true" placeholder="请输入编号" />
+			<uni-forms-item name="strategy_name" label="策略名称" required>
+				<uni-easyinput v-model="formData.strategy_name" :clearable="true" placeholder="请输入策略名称" />
 			</uni-forms-item>
-			<uni-forms-item name="field" label="字段">
-				<uni-easyinput v-model="formData.field" :clearable="true" placeholder="请输入字段" />
+			<uni-forms-item name="execute_status" label="执行状态">
+				<uni-easyinput v-model="formData.execute_status" :clearable="true" placeholder="请输入执行状态" />
 			</uni-forms-item>
-			<uni-forms-item name="value" label="值">
-				<uni-easyinput v-model="formData.value" :clearable="true" placeholder="请输入值" />
+			<uni-forms-item name="execute_message" label="执行消息">
+				<uni-easyinput v-model="formData.execute_message" :clearable="true" placeholder="请输入执行消息" />
 			</uni-forms-item>
-			<uni-forms-item name="operator" label="操作符">
-				<uni-easyinput v-model="formData.operator" :clearable="true" placeholder="请输入操作符" />
+			<uni-forms-item name="execute_time" label="执行时间">
+				<uni-easyinput v-model="formData.execute_time" :clearable="true" placeholder="请输入执行时间" />
 			</uni-forms-item>
 			<view class="uni-button-group">
 				<button style="width: 100px;" type="primary" class="uni-button"
@@ -32,18 +32,18 @@
 <script>
 	const db = uniCloud.database();
 	const dbCmd = db.command;
-	const dbCollectionName = 'stock-strategy-set';
+	const dbCollectionName = 'stock-strategy-execute';
 
 	export default {
 		data() {
 			return {
 				formData: {
-					code: '',
-					name: '',
-					no: '',
-					field: '',
-					value: '',
-					operator: ''
+					batch: '',
+					strategy_code: '',
+					strategy_name: '',
+					execute_status: '',
+					execute_message: '',
+					execute_time: ''
 				},
 			}
 		},
@@ -63,7 +63,7 @@
 				})
 				db.collection(dbCollectionName)
 					.doc(id)
-					.field('code,name,field,value,operator')
+					.field('batch,strategy_code,strategy_name,execute_status,execute_message, execute_time')
 					.get()
 					.then((res) => {
 						const data = res.result.data[0]
@@ -102,13 +102,13 @@
 
 				console.log('submit this.formDataId:', this.formDataId);
 
-				db.collection('stock-strategy-set').doc(this.formDataId).update({
-					code: value.code,
-					name: value.name,
-					no: value.no,
-					field: value.field,
-					value: value.value,
-					operator: value.operator
+				db.collection(dbCollectionName).doc(this.formDataId).update({
+					batch: value.batch,
+					strategy_code: value.strategy_code,
+					strategy_name: value.strategy_name,
+					execute_status: value.execute_status,
+					execute_message: value.execute_message,
+					execute_time: value.execute_time
 				}).then((res) => {
 					console.log('res:', res);
 					if (res.result.code == 0) {
@@ -136,8 +136,6 @@
 					}
 				})
 			},
-
-
 		}
 	}
 </script>
