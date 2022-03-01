@@ -1,0 +1,30 @@
+{
+	"bsonType": "object",
+	"required": [],
+	"permission": {
+		"read": true,
+		"create": true,
+		"update": true,
+		"delete": true
+	},
+	"properties": {
+		"_id": {
+			"description": "ID，系统自动生成"
+		},
+		"code": {
+			"description": "策略代码"
+		},
+		"name": {
+			"description": "策略名称"
+		},
+		"field": {
+			"description": "字段"
+		},
+		"value": {
+			"description": "值"
+		},
+		"operator": {
+			"description": "操作符"
+		}
+	}
+}

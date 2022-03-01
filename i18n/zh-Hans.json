@@ -56,7 +56,8 @@
 			"submit": "提交",
 			"back": "返回",
 			"tagManager": "标签管理",
-			"sync": "同步"
+			"sync": "同步",
+			"save": "保存"
 		},
 		"empty": "没有更多数据",
 		"piecePerPage": "条/页"

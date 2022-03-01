@@ -118,10 +118,12 @@ exports.main = async (event, context) => {
 	async function insertDataNow(dataNowDict) {
 		let dictItem = {},
 			dataNowItem = {},
-			dataNowList = []
+			dataNowList = [],
+			timeStr
 
 		for (let key in dataNowDict) {
 			dataNowItem = {}
+			timeStr = ''
 			dictItem = dataNowDict[key]
 			dataNowItem.code = dictItem.code
 			dataNowItem.name = dictItem.name
@@ -132,7 +134,9 @@ exports.main = async (event, context) => {
 			dataNowItem.pre_close = dictItem.yestclose
 			dataNowItem.bargain_volume = dictItem.volume
 			dataNowItem.bargain_amount = dictItem.turnover
-			dataNowItem.time = dictItem.time
+			timeStr = dictItem.time.replace(/\//g, '-')
+			dataNowItem.time = timeStr
+			dataNowItem.date = timeStr.substr(0, 10)
 			dataNowList.push(dataNowItem)
 		}
 		

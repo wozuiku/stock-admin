@@ -48,9 +48,9 @@ exports.main = async (event, context) => {
 			await insertDataNow(dataNowDict)
 		}
 	}else if(type == 'delDate'){
-		deleteDate(date)
+		await deleteDate(date)
 	}else if(type == 'delAll'){
-		deleteAll()
+		await deleteAll()
 	}
 	
 	

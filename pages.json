@@ -22,7 +22,6 @@
 			"style": {
 				"navigationBarTitleText": "修改密码"
 			}
-
 		}
 	],
 	"subPackages": [{
@@ -178,6 +177,39 @@
 			"path": "now/list",
 			"style": {
 				"navigationBarTitleText": "实时数据管理",
+				"navigationStyle": "default"
+			}
+		}]
+	}, {
+		"root": "pages/strategy",
+		"pages": [{
+			"path": "set/list",
+			"style": {
+				"navigationBarTitleText": "设置-列表",
+				"navigationStyle": "default"
+			}
+		},{
+			"path": "set/add",
+			"style": {
+				"navigationBarTitleText": "设置-新增",
+				"navigationStyle": "default"
+			}
+		},{
+			"path": "set/edit",
+			"style": {
+				"navigationBarTitleText": "设置-修改",
+				"navigationStyle": "default"
+			}
+		}, {
+			"path": "execute/list",
+			"style": {
+				"navigationBarTitleText": "执行-列表",
+				"navigationStyle": "default"
+			}
+		}, {
+			"path": "result/list",
+			"style": {
+				"navigationBarTitleText": "结果-列表",
 				"navigationStyle": "default"
 			}
 		}]

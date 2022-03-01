@@ -17,6 +17,9 @@
 		"time": {
 			"description": "time"
 		},
+		"date": {
+			"description": "date"
+		},
 		"code": {
 			"description": "code"
 		},
