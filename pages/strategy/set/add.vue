@@ -1,6 +1,6 @@
 <template>
 	<view class="uni-container">
-		<uni-forms ref="form" v-model="formData"  @submit="submit">
+		<uni-forms ref="form" v-model="formData" @submit="submit">
 			<uni-forms-item name="code" label="策略代码" required>
 				<uni-easyinput v-model="formData.code" :clearable="false" placeholder="请输入策略代码" />
 			</uni-forms-item>
@@ -27,13 +27,12 @@
 </template>
 
 <script>
-	
 	const db = uniCloud.database();
 	const dbCmd = db.command;
 	const dbCollectionName = 'stock-strategy-set';
-	
+
 	export default {
-		data(){
+		data() {
 			return {
 				formData: {
 					code: '',
@@ -44,22 +43,50 @@
 				}
 			}
 		},
-		
+
 		methods: {
-			
+
 			submitForm() {
 				this.$refs.form.submit();
 			},
-			
-			submit(event){
+
+			submit(event) {
 				const {
 					value,
 					errors
 				} = event.detail
-				
 				console.log('submit value:', value);
+
+
+				db.collection('stock-strategy-set').add(value).then((res) => {
+						console.log('submit add res.result.code:', res.result.code);
+						if(res.result.code == 0){
+							uni.showToast({
+							    title: '新增成功',
+							    duration: 2000
+							});
+							
+							this.navigateTo('./list')
+						}
+					})
+					.catch((err) => {
+
+					})
 			},
 			
+			navigateTo(url, clear) {
+				console.log('navigateTo url:', url);
+				// clear 表示刷新列表时是否清除页码，true 表示刷新并回到列表第 1 页，默认为 true
+				uni.navigateTo({
+					url,
+					events: {
+						refreshData: () => {
+							this.loadData(clear)
+						}
+					}
+				})
+			},
+
 		},
 	}
 </script>
