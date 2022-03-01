@@ -232,7 +232,7 @@
 				this.syncLoading = true
 				this.syncBtnText = '同步中...'
 				uniCloud.callFunction({
-						name: 'data_cf',
+						name: 'data-cf',
 						data: {
 							type: 'sync'
 						}
@@ -274,7 +274,7 @@
 				this.delAllLoading = true
 				this.delAllBtnText = '删除...'
 				uniCloud.callFunction({
-						name: 'data_cf',
+						name: 'data-cf',
 						data: {
 							type: 'delAll'
 						}
@@ -298,7 +298,7 @@
 				this.delDateLoading = true
 				this.delDateBtnText = '删除...'
 				uniCloud.callFunction({
-						name: 'data_cf',
+						name: 'data-cf',
 						data: {
 							type: 'delDate',
 							date: this.delDate
