@@ -9,7 +9,7 @@
 				<button class="uni-button" type="primary" size="mini"
 					@click="navigateTo('./add')">{{$t('common.button.add')}}</button>
 				<button class="uni-button" type="warn" size="mini"
-					@click="delBatch">{{$t('common.button.batchDelete')}}</button>
+					@click="delTable">{{$t('common.button.batchDelete')}}</button>
 			</view>
 		</view>
 
@@ -148,56 +148,7 @@
 				return `${year}-${month}-${day}`;
 			},
 			
-			delDateChange: function(e) {
-			    this.delDate = e.target.value
-			},
-
-			delDataAll() {
-				this.delAllLoading = true
-				this.delAllBtnText = '删除...'
-				uniCloud.callFunction({
-						name: 'data_cf',
-						data: {
-							type: 'delAll'
-						}
-					})
-					.then(res => {
-						console.log('delDataAll res:', res);
-
-						setTimeout(() => {
-							this.delAllLoading = false
-							this.delAllBtnText = '全部删除'
-							this.search()
-						}, 1000)
-
-						//this.showDelModal = false
-						//
-					});
-			},
-
-			delDataDate() {
-				console.log('this.delDate:', this.delDate);
-				this.delDateLoading = true
-				this.delDateBtnText = '删除...'
-				uniCloud.callFunction({
-						name: 'data_cf',
-						data: {
-							type: 'delDate',
-							date: this.delDate
-						}
-					})
-					.then(res => {
-						console.log('delDate res:', res);
-						setTimeout(() => {
-							this.delDateLoading = false
-							this.delDateBtnText = '按日期删除'
-							this.search()
-						}, 200)
-					});
-
-			},
-
-
+			
 			loadData(clear = true) {
 				this.$refs.udb.loadData({
 					clear
@@ -206,6 +157,21 @@
 			
 			confirmDelete(id) {
 				this.$refs.udb.remove(id, {
+					success: (res) => {
+						this.$refs.table.clearSelection()
+					}
+				})
+			},
+			
+			// 多选处理
+			selectedItems() {
+				var dataList = this.$refs.udb.dataList
+				return this.selectedIndexs.map(i => dataList[i]._id)
+			},
+			
+			// 批量删除
+			delTable() {
+				this.$refs.udb.remove(this.selectedItems(), {
 					success: (res) => {
 						this.$refs.table.clearSelection()
 					}
