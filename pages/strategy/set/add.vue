@@ -56,6 +56,8 @@
 					value,
 					errors
 				} = event.detail
+				
+				console.log('submit value:', value);
 			},
 			
 		},
