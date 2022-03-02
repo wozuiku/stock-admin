@@ -7,19 +7,30 @@ exports.main = async (event, context) => {
 	//event为客户端上传的参数
 	console.log('event : ', event)
 	const type = event.type
+	const batch = event.batch
 	const date = event.date
-	
-	if(type == 'sync'){
+
+	if (type == 'sync') {
 		let res = {},
-			totalCount = 0,   //表stock-code总记录数
-			pageSize = 500,   //分页查询每页大小
-			totalPage = 0,    //表stock-code总页数即分页查询总共需要查询次数
-			pageObj = {},	  //分页查询每次返回数据pageObj包含stockList和lastId
-			lastId = '',      //分页查询每次查询起始位置
-			stockList = [],   //股票代码列表
-			stockCodes,       //拼接接口所需股票代码列表
-			dataNowDict = []  //从接口同步实时数据并解析为数据字典格式
-		
+			//batchNo = '', //批次号
+			totalCount = 0, //表stock-code总记录数
+			pageSize = 500, //分页查询每页大小
+			totalPage = 0, //表stock-code总页数即分页查询总共需要查询次数
+			pageObj = {}, //分页查询每次返回数据pageObj包含stockList和lastId
+			lastId = '', //分页查询每次查询起始位置
+			stockList = [], //股票代码列表
+			stockCodes, //拼接接口所需股票代码列表
+			dataNowDict = [] //从接口同步实时数据并解析为数据字典格式
+
+		// //获取批次号
+		// res = await uniCloud.callFunction({
+		// 	name: 'batch-cf',
+		// 	data: {
+		// 		type: 'NOW'
+		// 	}
+		// })
+		// batchNo = res.result
+
 		//获取totalCount、totalPage、lastId
 		res = await db.collection('stock-code').where({
 			_id: dbCmd.neq(null)
@@ -30,54 +41,56 @@ exports.main = async (event, context) => {
 		res = await db.collection('stock-code').limit(1).orderBy("_id", "asc").get()
 		lastId = res.data[0]._id
 		console.log('totalCount:', totalCount, 'totalPage:', totalPage, 'lastId:', lastId);
-		
+
 		//分页获取股票列表并同步实时数据
-		for(let i = 0; i < totalPage; i++){
+		for (let i = 0; i < totalPage; i++) {
 			console.log('当前分页:', i);
 			//分页获取股票列表
 			pageObj = await getStockByPage(i, lastId, pageSize)
 			stockList = pageObj.stockList
 			lastId = pageObj.lastId
-			
+
 			//拼接接口所需股票代码列表
 			stockCodes = getCodes(stockList)
-			
+
 			//从接口同步实时数据并解析为数据字典格式
 			dataNowDict = await syncDataNow(stockCodes)
 			//将实时数据添加到云数据库
-			await insertDataNow(dataNowDict)
+			await insertDataNow(dataNowDict, batch)
 		}
-	}else if(type == 'delDate'){
+	} else if (type == 'delBatch') {
+		await deleteBatch(batch)
+	} else if (type == 'delDate') {
 		await deleteDate(date)
-	}else if(type == 'delAll'){
+	} else if (type == 'delAll') {
 		await deleteAll()
 	}
-	
-	
-	
-	async function getStockByPage(currentPageNo, lastId, pageSize){
-		
+
+
+
+	async function getStockByPage(currentPageNo, lastId, pageSize) {
+
 		let res = {}
 		let pageObj = {}
-		
-		
-		if(currentPageNo == 0){
+
+
+		if (currentPageNo == 0) {
 			res = await db.collection('stock-code').where({
 				_id: dbCmd.gte(lastId)
 			}).limit(pageSize).orderBy("_id", "asc").get()
-		}else {
+		} else {
 			res = await db.collection('stock-code').where({
 				_id: dbCmd.gt(lastId)
 			}).limit(pageSize).orderBy("_id", "asc").get()
 		}
-		
+
 		let listCount = res.data.length
 		pageObj.lastId = res.data[listCount - 1]._id
 		pageObj.stockList = res.data
-		
+
 		console.log('pageObj:', pageObj);
-		
-		
+
+
 		return pageObj
 	}
 
@@ -120,17 +133,18 @@ exports.main = async (event, context) => {
 		return JSON.parse(dataNow)
 	}
 
-	async function insertDataNow(dataNowDict) {
+	async function insertDataNow(dataNowDict, batchNo) {
 		let dictItem = {},
 			dataNowItem = {},
-		    dataNowList = [],
+			dataNowList = [],
 			timeStr
-        
-		
+
+
 		for (let key in dataNowDict) {
 			dataNowItem = {}
 			timeStr = ''
 			dictItem = dataNowDict[key]
+			dataNowItem.batch = batchNo
 			dataNowItem.code = dictItem.code
 			dataNowItem.name = dictItem.name
 			dataNowItem.price = dictItem.price
@@ -145,20 +159,25 @@ exports.main = async (event, context) => {
 			dataNowItem.date = timeStr.substr(0, 10)
 			dataNowList.push(dataNowItem)
 		}
-		
+
 		await db.collection('stock-data-now').add(dataNowList)
 	}
 	
-	
-	async function deleteDate(date){
+	async function deleteBatch(batch) {
 		let res = await db.collection('stock-data-now').where({
-		  date: dbCmd.eq(date)
+			batch: dbCmd.eq(batch)
 		}).remove()
 	}
-	
-	async function deleteAll(){
+
+	async function deleteDate(date) {
 		let res = await db.collection('stock-data-now').where({
-		  _id: dbCmd.exists(true)
+			date: dbCmd.eq(date)
+		}).remove()
+	}
+
+	async function deleteAll() {
+		let res = await db.collection('stock-data-now').where({
+			_id: dbCmd.exists(true)
 		}).remove()
 	}
 

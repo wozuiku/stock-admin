@@ -21,13 +21,14 @@
 
 		<view class="uni-container">
 			<unicloud-db ref="udb" collection="stock-data-now"
-				field="time,date,code,name,price,high,low,open,pre_close,bargain_volume,bargain_amount" :where="where"
+				field="batch,time,date,code,name,price,high,low,open,pre_close,bargain_volume,bargain_amount" :where="where"
 				:getcount="true" :page-size="options.pageSize" :page-current="options.pageCurrent"
 				v-slot:default="{data,pagination, loading, error, options}">
 				<uni-table ref="table" :loading="loading" :emptyText="error.message || $t('common.empty')" border stripe
 					type="selection" @selection-change="selectionChange">
 
 					<uni-tr>
+						<uni-th align="center">批次</uni-th>
 						<uni-th align="center">时间</uni-th>
 						<!-- <uni-th align="center">日期</uni-th> -->
 						<uni-th align="center">代码</uni-th>
@@ -42,6 +43,7 @@
 						<uni-th align="center">操作</uni-th>
 					</uni-tr>
 					<uni-tr v-for="(item,index) in data" :key="index">
+						<uni-td align="center">{{item.batch}}</uni-td>
 						<uni-td align="center">{{item.time}}</uni-td>
 						<!-- <uni-td align="center">{{item.date}}</uni-td> -->
 						<uni-td align="center">{{item.code}}</uni-td>
@@ -91,14 +93,16 @@
 					<view class="padding-xl">
 						<form>
 							<view class="cu-form-group">
+								<view class="title">选择批次</view>
+								<uni-easyinput v-model="batchNo"></uni-easyinput>
+							</view>
+							<view class="cu-form-group">
 								<view class="title">选择日期</view>
-								<picker mode="date" :value="delDate"
-									@change="delDateChange">
+								<picker mode="date" :value="delDate" @change="delDateChange">
 									<view class="picker">
 										{{delDate}}
 									</view>
 								</picker>
-
 							</view>
 						</form>
 					</view>
@@ -116,7 +120,8 @@
 							</view>
 							<view class="right">
 								<view class="action">
-									<button class="cu-btn line-blue" @tap="hideModal">取消</button>
+									<button class="cu-btn bg-blue" :loading="delBatchLoading"
+										@click="delDataBatch">{{delBatchBtnText}}</button>
 									<button class="cu-btn bg-blue margin-left" :loading="delDateLoading"
 										@click="delDataDate">{{delDateBtnText}}</button>
 								</view>
@@ -133,8 +138,10 @@
 
 <script>
 	
-	const dbSearchFields = ['time', 'date', 'code', 'name', 'price', 'high', 'low', 'open', 'pre_close', 'item.bargain_volume', 'bargain_amount'] // 支持模糊搜索的字段列表
-	
+	const dbSearchFields = ['batch', 'time', 'date', 'code', 'name', 'price', 'high', 'low', 'open', 'pre_close',
+		'item.bargain_volume', 'bargain_amount'
+	] // 支持模糊搜索的字段列表
+
 
 	const pageSize = 10
 	const pageCurrent = 1
@@ -152,9 +159,13 @@
 				syncBtnText: '同步',
 
 				showDelModal: false,
+				batchNo: '',
+				syncBatchNo: '',
 				delDate: this.getDate(),
+				delBatchLoading: false,
+				delBatchBtnText: '按批次',
 				delDateLoading: false,
-				delDateBtnText: '按日期删除',
+				delDateBtnText: '按日期',
 				delAllLoading: false,
 				delAllBtnText: '全部删除',
 
@@ -202,6 +213,10 @@
 				exportExcelData: [],
 			}
 		},
+		
+		onShow() {
+			this.getBatchNo()
+		},
 
 		watch: {
 			pageSizeIndex: {
@@ -217,6 +232,12 @@
 		},
 
 		methods: {
+			
+			async getBatchNo(){
+				this.syncBatchNo = await this.$batch.getBatchNo('NOW')
+				console.log('syncBatchNo = ', this.syncBatchNo);
+				
+			},
 
 			search() {
 				const newWhere = this.getWhere()
@@ -234,7 +255,8 @@
 				uniCloud.callFunction({
 						name: 'data-cf',
 						data: {
-							type: 'sync'
+							type: 'sync',
+							batch: this.syncBatchNo
 						}
 					})
 					.then(res => {
@@ -253,21 +275,21 @@
 				this.showDelModal = false
 			},
 
-			
-			
+
+
 			getDate() {
 				const date = new Date();
 				let year = date.getFullYear();
 				let month = date.getMonth() + 1;
 				let day = date.getDate();
-			
+
 				month = month > 9 ? month : '0' + month;
 				day = day > 9 ? day : '0' + day;
 				return `${year}-${month}-${day}`;
 			},
-			
+
 			delDateChange: function(e) {
-			    this.delDate = e.target.value
+				this.delDate = e.target.value
 			},
 
 			delDataAll() {
@@ -292,6 +314,27 @@
 						//
 					});
 			},
+			
+			delDataBatch() {
+				console.log('this.batchNo:', this.batchNo);
+				this.delBatchLoading = true
+				this.delBatchBtnText = '删除...'
+				uniCloud.callFunction({
+						name: 'data-cf',
+						data: {
+							type: 'delBatch',
+							batch: this.batchNo
+						}
+					})
+					.then(res => {
+						console.log('delDate res:', res);
+						setTimeout(() => {
+							this.delBatchLoading = false
+							this.delBatchBtnText = '按批次'
+							this.search()
+						}, 200)
+					});
+			},
 
 			delDataDate() {
 				console.log('this.delDate:', this.delDate);
@@ -312,7 +355,6 @@
 							this.search()
 						}, 200)
 					});
-
 			},
 
 
@@ -348,9 +390,9 @@
 				})
 			},
 
-			
-					
-					
+
+
+
 		}
 	}
 </script>

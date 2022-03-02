@@ -8,6 +8,7 @@ exports.main = async (event, context) => {
 	console.log('event : ', event)
 
 	let res = {},
+		batchNo = '', //批次号
 		totalCount = 0, //表stock-code总记录数
 		pageSize = 500, //分页查询每页大小
 		totalPage = 0, //表stock-code总页数即分页查询总共需要查询次数
@@ -16,6 +17,16 @@ exports.main = async (event, context) => {
 		stockList = [], //股票代码列表
 		stockCodes, //拼接接口所需股票代码列表
 		dataNowDict = [] //从接口同步实时数据并解析为数据字典格式
+		
+	//获取批次号
+	res = await uniCloud.callFunction({
+		name: 'batch-cf',
+		data: {
+			type: 'NOW'
+		}
+	})
+	batchNo = res.result
+	console.log('batchNo:', batchNo);
 
 	//获取totalCount、totalPage、lastId
 	res = await db.collection('stock-code').where({
@@ -42,7 +53,7 @@ exports.main = async (event, context) => {
 		//从接口同步实时数据并解析为数据字典格式
 		dataNowDict = await syncDataNow(stockCodes)
 		//将实时数据添加到云数据库
-		await insertDataNow(dataNowDict)
+		await insertDataNow(dataNowDict, batchNo)
 	}
 
 
@@ -115,7 +126,7 @@ exports.main = async (event, context) => {
 		return JSON.parse(dataNow)
 	}
 
-	async function insertDataNow(dataNowDict) {
+	async function insertDataNow(dataNowDict, batchNo) {
 		let dictItem = {},
 			dataNowItem = {},
 			dataNowList = [],
@@ -125,6 +136,7 @@ exports.main = async (event, context) => {
 			dataNowItem = {}
 			timeStr = ''
 			dictItem = dataNowDict[key]
+			dataNowItem.batch = batchNo
 			dataNowItem.code = dictItem.code
 			dataNowItem.name = dictItem.name
 			dataNowItem.price = dictItem.price

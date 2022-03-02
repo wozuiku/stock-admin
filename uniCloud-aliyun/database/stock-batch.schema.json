@@ -2,14 +2,23 @@
 	"bsonType": "object",
 	"required": [],
 	"permission": {
-		"read": false,
-		"create": false,
-		"update": false,
-		"delete": false
+		"read": true,
+		"create": true,
+		"update": true,
+		"delete": true
 	},
 	"properties": {
 		"_id": {
 			"description": "ID，系统自动生成"
+		},
+		"type": {
+			"description": "类型"
+		},
+		"date": {
+			"description": "时间"
+		},
+		"sequence": {
+			"description": "流水"
 		}
 	}
 }
