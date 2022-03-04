@@ -214,10 +214,6 @@
 			}
 		},
 		
-		onShow() {
-			this.getBatchNo()
-		},
-
 		watch: {
 			pageSizeIndex: {
 				immediate: true,
@@ -233,12 +229,6 @@
 
 		methods: {
 			
-			async getBatchNo(){
-				this.syncBatchNo = await this.$batch.getBatchNo('NOW')
-				console.log('syncBatchNo = ', this.syncBatchNo);
-				
-			},
-
 			search() {
 				const newWhere = this.getWhere()
 				this.where = newWhere
@@ -249,7 +239,11 @@
 				})
 			},
 
-			sync() {
+			async sync() {
+				
+				this.syncBatchNo = await this.$batch.getBatchNo('NOW')
+				console.log('sync this.syncBatchNo:', this.syncBatchNo);
+				
 				this.syncLoading = true
 				this.syncBtnText = '同步中...'
 				uniCloud.callFunction({
@@ -294,7 +288,7 @@
 
 			delDataAll() {
 				this.delAllLoading = true
-				this.delAllBtnText = '删除...'
+				this.delAllBtnText = '删除'
 				uniCloud.callFunction({
 						name: 'data-cf',
 						data: {
@@ -318,7 +312,7 @@
 			delDataBatch() {
 				console.log('this.batchNo:', this.batchNo);
 				this.delBatchLoading = true
-				this.delBatchBtnText = '删除...'
+				this.delBatchBtnText = '删除'
 				uniCloud.callFunction({
 						name: 'data-cf',
 						data: {
@@ -339,7 +333,7 @@
 			delDataDate() {
 				console.log('this.delDate:', this.delDate);
 				this.delDateLoading = true
-				this.delDateBtnText = '删除...'
+				this.delDateBtnText = '删除中'
 				uniCloud.callFunction({
 						name: 'data-cf',
 						data: {
@@ -351,7 +345,7 @@
 						console.log('delDate res:', res);
 						setTimeout(() => {
 							this.delDateLoading = false
-							this.delDateBtnText = '按日期删除'
+							this.delDateBtnText = '按日期'
 							this.search()
 						}, 200)
 					});

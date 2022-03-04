@@ -9,6 +9,9 @@ exports.main = async (event, context) => {
 	const type = event.type
 	const batch = event.batch
 	const date = event.date
+	console.log('参数 type:', type)
+	console.log('参数 batch:', batch)
+	console.log('参数 date:', date)
 
 	if (type == 'sync') {
 		let res = {},
@@ -134,6 +137,7 @@ exports.main = async (event, context) => {
 	}
 
 	async function insertDataNow(dataNowDict, batchNo) {
+		//console.log('insertDataNow batchNo:', batchNo);
 		let dictItem = {},
 			dataNowItem = {},
 			dataNowList = [],
