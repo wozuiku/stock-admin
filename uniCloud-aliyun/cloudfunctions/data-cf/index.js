@@ -92,8 +92,7 @@ exports.main = async (event, context) => {
 		pageObj.stockList = res.data
 
 		console.log('pageObj:', pageObj);
-
-
+		
 		return pageObj
 	}
 

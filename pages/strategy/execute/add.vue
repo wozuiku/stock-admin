@@ -1,18 +1,17 @@
 <template>
 	<view class="uni-container">
-		
 		<uni-forms ref="form" v-model="formData" @submit="submit">
-			<uni-forms-item name="batch" label="批次">
-				<uni-easyinput v-model="formData.batch" :clearable="true" placeholder="请输入批次" />
-			</uni-forms-item>
-			<uni-forms-item name="strategy_code" label="策略">
+			<uni-forms-item name="strategy_code" label="选择策略">
 				<picker @change="pickerChange" :value="index" :range="strategyPicker">
 					<view class="picker">
 						{{index>-1?strategyPicker[index]:'请选择'}}
 					</view>
 				</picker>
 			</uni-forms-item>
-			<uni-forms-item name="strategy_code" label="进度">
+			<uni-forms-item name="batch" label="数据批次">
+				<uni-easyinput v-model="formData.batch" :clearable="true" placeholder="请输入批次" />
+			</uni-forms-item>
+			<uni-forms-item name="strategy_code" label="执行进度">
 				<slider value="20" name="age" show-value></slider>
 			</uni-forms-item>
 			<view class="uni-button-group">
@@ -46,35 +45,35 @@
 					['中国', '日本']
 				],
 				multiIndex: [0, 0],
-				
+
 				index: -1,
 				strategyPicker: [],
 			}
 		},
-		
-		onLoad(){
+
+		onLoad() {
 			this.init()
 		},
 
 		methods: {
-			
-			async init(){
-				this.formData.batch = await this.$batch.getBatchNo('EXEC')
-				
+
+			async init() {
+				//this.formData.batch = await this.$batch.getBatchNo('EXEC')
+
 				let res = await db.collection('stock-strategy-set').get()
 				let setList = res.result.data
-				
+
 				setList.forEach((item, index) => {
 					if (!this.strategyPicker.includes(item.code)) {
-					    this.strategyPicker.push(item.code)
-					  }
+						this.strategyPicker.push(item.code)
+					}
 				})
-				
+
 				console.log('setList:', setList);
 				console.log('this.strategyPicker:', this.strategyPicker);
-				
+
 			},
-			
+
 			pickerChange(e) {
 				console.log('pickerChange:', e);
 				this.index = e.detail.value
@@ -92,30 +91,12 @@
 					errors
 				} = event.detail
 				console.log('submit value:', value);
-				
-				
-				let res = await db.collection('stock-strategy-set').where({
-					code: this.formData.strategy_code
-				}).orderBy('no', 'asc').get()
-				
-				let setList = res.result.data
-				let upper, body, lower
-				
-				
-				setList.forEach((item, index) => {
-					if(item.field == 'upper'){
-						upper = item.value
-					}else if(item.field == 'body'){
-						body = item.value
-					}else if(item.field == 'lower'){
-						lower = item.value
-					}
-				})
-				
-				console.log('submit setList:', setList);
-				console.log('submit upper:', upper, 'body:', body, 'lower:', lower);
-				
-				
+
+				if (this.formData.strategy_code == 'shadow') {
+					this.strategyShadow()
+				}
+
+
 
 				// db.collection('stock-strategy-execute').add(value).then((res) => {
 				// 		console.log('submit add res.result.code:', res.result.code);
@@ -131,6 +112,173 @@
 				// 	.catch((err) => {
 
 				// 	})
+			},
+
+			async strategyShadow() {
+				let res = {},
+					totalCount = 0, //表stock-code总记录数
+					pageSize = 500, //分页查询每页大小
+					totalPage = 0, //表stock-code总页数即分页查询总共需要查询次数
+					pageObj = {}, //分页查询每次返回数据pageObj包含stockList和lastId
+					lastId = '', //分页查询每次查询起始位置
+					dataList = [], //数据列表
+					strategyItemList = []
+				
+				res = await db.collection('stock-data-now').where({
+					_id: dbCmd.neq(null),
+					batch: this.formData.batch
+				}).count()
+				totalCount = res.result.total
+				totalPage = Math.ceil(totalCount / pageSize)
+				//初始lastId默认为第一条记录_id
+				res = await db.collection('stock-data-now').where({
+					batch: this.formData.batch
+				}).limit(1).orderBy("_id", "asc").get()
+				//console.log('strategyShadow res:', res);
+				lastId = res.result.data[0]._id
+				console.log('totalCount:', totalCount, 'totalPage:', totalPage, 'lastId:', lastId);
+
+				//分页获取股票列表并同步实时数据
+				for (let i = 0; i < totalPage; i++) {
+					console.log('当前分页:', i);
+					//分页获取实时数据
+					pageObj = await this.getDataByPage(i, lastId, pageSize)
+					dataList = pageObj.dataList
+					lastId = pageObj.lastId
+					console.log('dataList:', dataList);
+					//获取符合策略股票列表
+					strategyItemList = await this.getStrategyItems(dataList)
+					//将符合策略的股票列表插入到策略结果表
+					await this.insertStrategyResult(strategyItemList, this.formData.batch)
+				}
+			},
+
+
+			async getDataByPage(currentPageNo, lastId, pageSize) {
+				let res = {}
+				let pageObj = {}
+
+				if (currentPageNo == 0) {
+					res = await db.collection('stock-data-now').where({
+						_id: dbCmd.gte(lastId)
+					}).limit(pageSize).orderBy("_id", "asc").get()
+				} else {
+					res = await db.collection('stock-data-now').where({
+						_id: dbCmd.gt(lastId)
+					}).limit(pageSize).orderBy("_id", "asc").get()
+				}
+
+				let listCount = res.result.data.length
+				pageObj.lastId = res.result.data[listCount - 1]._id
+				pageObj.dataList = res.result.data
+
+				return pageObj
+			},
+
+			async getStrategyItems(dataList) {
+				let code, name, high, low, open, price, itemUpper, itemBody, itemLower, itemLength, itemUpperPercent, itemBodyPercent, itemLowerPercent
+				let strategy = {}, strategyUpper, strategyBody, strategyLower, strategyLength = 100, strategyUpperPercent, strategyBodyPercent, strategyLowerPercent
+				let strategyItemList = []
+				
+
+				strategy = await this.getStrategy()
+				console.log('getStrategyItems strategy:', strategy)
+				strategyUpper = parseInt(strategy.upper)
+				strategyBody = parseInt(strategy.body)
+				strategyLower = parseInt(strategy.lower)
+
+				dataList.forEach((item, index) => {
+					code = item.code
+					name = item.name
+					high = item.high
+					low = item.low
+					open = item.open
+					price = item.price
+
+					
+					if(parseInt(price) >= parseInt(open)){
+						itemUpper =  parseInt(high) - parseInt(price)
+						itemBody =  parseInt(price) - parseInt(open)
+						itemLower =  parseInt(open) - parseInt(low)
+						itemLength = parseInt(high) - parseInt(low)
+					}else{
+						itemUpper =  parseInt(high) - parseInt(open)
+						itemBody =  parseInt(open) - parseInt(price)
+						itemLower =  parseInt(price) - parseInt(low)
+						itemLength = parseInt(high) - parseInt(low)
+					}
+					
+					itemLowerPercent = itemLower / itemLength
+					strategyLowerPercent = strategyLower / strategyLength
+					
+					if(itemLowerPercent >= strategyLowerPercent){
+						strategyItemList.push(item)
+					}
+					
+
+				})
+				
+				
+				return strategyItemList
+
+
+			},
+			
+			
+			async insertStrategyResult(strategyItemList, batchNo) {
+				let strategyResultItem = {},
+					strategyResultList = []
+			
+				strategyItemList.forEach((item, index) => {
+					strategyResultItem.batch = batchNo
+					strategyResultItem.strategy_code = this.formData.strategy_code
+					strategyResultItem.stock_code = item.code
+					strategyResultItem.stock_name = item.name
+					strategyResultList.push(strategyResultItem)
+				})
+			
+				await db.collection('stock-strategy-result').add(strategyResultList)
+			},
+
+			async getStrategy() {
+				let res = {},
+					strategySetList = [],
+					upper, body, lower,
+					strategy = {}
+
+				res = await db.collection('stock-strategy-set').where({
+					code: this.formData.strategy_code
+				}).orderBy('no', 'asc').get()
+
+				strategySetList = res.result.data
+
+				strategySetList.forEach((item, index) => {
+					if (item.field == 'upper') {
+						upper = item.value
+					} else if (item.field == 'body') {
+						body = item.value
+					} else if (item.field == 'lower') {
+						lower = item.value
+					}
+				})
+
+				strategy.upper = upper
+				strategy.body = body
+				strategy.lower = lower
+
+				return strategy
+			},
+
+			//获取当前日期
+			getDate() {
+				const date = new Date();
+				let year = date.getFullYear();
+				let month = date.getMonth() + 1;
+				let day = date.getDate();
+
+				month = month > 9 ? month : '0' + month;
+				day = day > 9 ? day : '0' + day;
+				return `${year}${month}${day}`;
 			},
 
 			navigateTo(url, clear) {
@@ -155,6 +303,6 @@
 		width: 680px;
 		display: flex;
 		align-items: center;
-		
+
 	}
 </style>
