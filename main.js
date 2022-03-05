@@ -4,6 +4,7 @@ import plugin from './js_sdk/uni-admin/plugin'
 import messages from './i18n/index.js'
 import uView from '@/uni_modules/uview-ui'
 import batch from '@/utils/batch'
+import formatter from '@/utils/formatter'
 
 
 const lang = uni.getLocale()
@@ -14,6 +15,7 @@ import VueI18n from 'vue-i18n'
 import http from '@/common/request/index'
 Vue.prototype.$http = http;
 Vue.prototype.$batch = batch;
+Vue.prototype.$formatter = formatter;
 
 Vue.config.productionTip = false
 Vue.use(VueI18n)

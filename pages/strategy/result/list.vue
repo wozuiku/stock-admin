@@ -10,32 +10,38 @@
 					@click="navigateTo('./add')">{{$t('common.button.add')}}</button>
 				<button class="uni-button" type="warn" size="mini"
 					@click="delTable">{{$t('common.button.batchDelete')}}</button>
+				<button class="uni-button" type="warn" size="mini"
+					@click="delAll">{{$t('common.button.allDelete')}}</button>
 			</view>
 		</view>
 
 		<view class="uni-container">
 			<unicloud-db ref="udb" collection="stock-strategy-result"
-				field="batch,strategy_code,strategy_name,stock_code,stock_name,execute_time" :where="where"
+				field="execute_batch,data_batch,strategy_code,strategy_name,stock_code,stock_name,stock_date,execute_time" :where="where"
 				:getcount="true" :page-size="options.pageSize" :page-current="options.pageCurrent"
 				v-slot:default="{data,pagination, loading, error, options}">
 				<uni-table ref="table" :loading="loading" :emptyText="error.message || $t('common.empty')" border stripe
 					type="selection" @selection-change="selectionChange">
 
 					<uni-tr>
-						<uni-th align="center">批次</uni-th>
+						<uni-th align="center">执行批次</uni-th>
+						<uni-th align="center">数据批次</uni-th>
 						<uni-th align="center">策略代码</uni-th>
 						<uni-th align="center">策略名称</uni-th>
 						<uni-th align="center">股票代码</uni-th>
 						<uni-th align="center">股票名称</uni-th>
+						<uni-th align="center">股票日期</uni-th>
 						<uni-th align="center">执行时间</uni-th>
 						<uni-th align="center">操作</uni-th>
 					</uni-tr>
 					<uni-tr v-for="(item,index) in data" :key="index">
-						<uni-td align="center">{{item.batch}}</uni-td>
+						<uni-td align="center">{{item.execute_batch}}</uni-td>
+						<uni-td align="center">{{item.data_batch}}</uni-td>
 						<uni-td align="center">{{item.strategy_code}}</uni-td>
 						<uni-td align="center">{{item.strategy_name}}</uni-td>
 						<uni-td align="center">{{item.stock_code}}</uni-td>
 						<uni-td align="center">{{item.stock_name}}</uni-td>
+						<uni-td align="center">{{item.stock_date}}</uni-td>
 						<uni-td align="center">{{item.execute_time}}</uni-td>
 						<uni-td align="center">
 							<view class="uni-group">
@@ -67,10 +73,13 @@
 </template>
 
 <script>
-	const dbSearchFields = ['batch', 'strategy_code', 'strategy_name', 'stock_code', 'stock_name', 'execute_time'] // 支持模糊搜索的字段列表
+	const dbSearchFields = ['execute_batch', 'data_batch', 'strategy_code', 'strategy_name', 'stock_code', 'stock_name', 'execute_time'] // 支持模糊搜索的字段列表
 	
 	const pageSize = 10
 	const pageCurrent = 1
+	
+	const db = uniCloud.database();
+	const dbCmd = db.command;
 
 	export default {
 		data() {
@@ -175,7 +184,15 @@
 					}
 				})
 			},
-
+			
+			async delAll(){
+				let res = await db.collection('stock-strategy-result').where({
+					_id: dbCmd.exists(true)
+				}).remove()
+				
+				this.search()
+			},
+			
 			// 多选
 			selectionChange(e) {
 				this.selectedIndexs = e.detail.index

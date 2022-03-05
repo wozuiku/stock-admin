@@ -8,8 +8,11 @@
 					</view>
 				</picker>
 			</uni-forms-item>
-			<uni-forms-item name="batch" label="数据批次">
-				<uni-easyinput v-model="formData.batch" :clearable="true" placeholder="请输入批次" />
+			<uni-forms-item name="data_batch" label="数据批次">
+				<uni-easyinput v-model="formData.data_batch" :clearable="true" placeholder="请输入批次" />
+			</uni-forms-item>
+			<uni-forms-item name="execute_batch" label="执行批次">
+				<uni-easyinput v-model="formData.execute_batch" :clearable="true" placeholder="请输入批次" />
 			</uni-forms-item>
 			<uni-forms-item name="strategy_code" label="执行进度">
 				<slider value="20" name="age" show-value></slider>
@@ -25,6 +28,8 @@
 </template>
 
 <script>
+	
+	
 	const db = uniCloud.database();
 	const dbCmd = db.command;
 	const dbCollectionName = 'stock-strategy-execute';
@@ -33,9 +38,10 @@
 		data() {
 			return {
 				formData: {
-					batch: '',
+					data_batch: '',
 					strategy_code: '',
 					strategy_name: '',
+					execute_batch: '',
 					execute_status: '',
 					execute_message: '',
 					execute_time: ''
@@ -53,13 +59,12 @@
 
 		onLoad() {
 			this.init()
+			
 		},
 
 		methods: {
 
 			async init() {
-				//this.formData.batch = await this.$batch.getBatchNo('EXEC')
-
 				let res = await db.collection('stock-strategy-set').get()
 				let setList = res.result.data
 
@@ -91,27 +96,16 @@
 					errors
 				} = event.detail
 				console.log('submit value:', value);
+				
+				this.formData.execute_batch = await this.$batch.getBatchNo('EXEC')
+				this.formData.execute_time = new Date().format("yyyy-MM-dd hh:mm:ss");
 
 				if (this.formData.strategy_code == 'shadow') {
 					this.strategyShadow()
 				}
 
-
-
-				// db.collection('stock-strategy-execute').add(value).then((res) => {
-				// 		console.log('submit add res.result.code:', res.result.code);
-				// 		if (res.result.code == 0) {
-				// 			uni.showToast({
-				// 				title: '新增成功',
-				// 				duration: 2000
-				// 			});
-
-				// 			this.navigateTo('./list')
-				// 		}
-				// 	})
-				// 	.catch((err) => {
-
-				// 	})
+				//新增一条执行记录
+				await this.insertStrategyExecute()
 			},
 
 			async strategyShadow() {
@@ -126,13 +120,13 @@
 				
 				res = await db.collection('stock-data-now').where({
 					_id: dbCmd.neq(null),
-					batch: this.formData.batch
+					batch: this.formData.data_batch
 				}).count()
 				totalCount = res.result.total
 				totalPage = Math.ceil(totalCount / pageSize)
 				//初始lastId默认为第一条记录_id
 				res = await db.collection('stock-data-now').where({
-					batch: this.formData.batch
+					batch: this.formData.data_batch
 				}).limit(1).orderBy("_id", "asc").get()
 				//console.log('strategyShadow res:', res);
 				lastId = res.result.data[0]._id
@@ -149,11 +143,11 @@
 					//获取符合策略股票列表
 					strategyItemList = await this.getStrategyItems(dataList)
 					//将符合策略的股票列表插入到策略结果表
-					await this.insertStrategyResult(strategyItemList, this.formData.batch)
+					await this.insertStrategyResult(strategyItemList)
 				}
 			},
 
-
+			//分页获取实时数据
 			async getDataByPage(currentPageNo, lastId, pageSize) {
 				let res = {}
 				let pageObj = {}
@@ -175,11 +169,11 @@
 				return pageObj
 			},
 
+			//获取符合策略股票列表
 			async getStrategyItems(dataList) {
 				let code, name, high, low, open, price, itemUpper, itemBody, itemLower, itemLength, itemUpperPercent, itemBodyPercent, itemLowerPercent
 				let strategy = {}, strategyUpper, strategyBody, strategyLower, strategyLength = 100, strategyUpperPercent, strategyBodyPercent, strategyLowerPercent
 				let strategyItemList = []
-				
 
 				strategy = await this.getStrategy()
 				console.log('getStrategyItems strategy:', strategy)
@@ -214,26 +208,36 @@
 					if(itemLowerPercent >= strategyLowerPercent){
 						strategyItemList.push(item)
 					}
-					
-
 				})
 				
-				
 				return strategyItemList
-
-
 			},
 			
 			
-			async insertStrategyResult(strategyItemList, batchNo) {
+			async insertStrategyExecute() {
+				let strategyExecute = {}
+				
+				strategyExecute.batch = this.formData.execute_batch
+				strategyExecute.strategy_code = this.formData.strategy_code
+				strategyExecute.execute_time = this.formData.execute_time
+			
+				await db.collection('stock-strategy-execute').add(strategyExecute)
+			},
+			
+			
+			async insertStrategyResult(strategyItemList) {
 				let strategyResultItem = {},
 					strategyResultList = []
 			
 				strategyItemList.forEach((item, index) => {
-					strategyResultItem.batch = batchNo
+					strategyResultItem = {}
+					strategyResultItem.execute_batch = this.formData.execute_batch
+					strategyResultItem.data_batch = this.formData.data_batch
 					strategyResultItem.strategy_code = this.formData.strategy_code
-					strategyResultItem.stock_code = item.code
+					strategyResultItem.stock_code = item.code.substr(1, item.code.length)
 					strategyResultItem.stock_name = item.name
+					strategyResultItem.stock_date = item.date
+					strategyResultItem.execute_time = this.formData.execute_time
 					strategyResultList.push(strategyResultItem)
 				})
 			

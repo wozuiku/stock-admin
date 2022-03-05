@@ -11,8 +11,11 @@
 		"_id": {
 			"description": "ID，系统自动生成"
 		},
-		"batch": {
-			"description": "批次"
+		"execute_batch": {
+			"description": "执行批次"
+		},
+		"data_batch": {
+			"description": "数据批次"
 		},
 		"strategy_code": {
 			"description": "策略代码"
@@ -25,6 +28,9 @@
 		},
 		"stock_name": {
 			"description": "股票名称"
+		},
+		"stock_date": {
+			"description": "股票日期"
 		},
 		"execute_time": {
 			"description": "执行时间"
