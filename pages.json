@@ -188,13 +188,13 @@
 				"navigationBarTitleText": "设置-列表",
 				"navigationStyle": "default"
 			}
-		},{
+		}, {
 			"path": "set/add",
 			"style": {
 				"navigationBarTitleText": "设置-新增",
 				"navigationStyle": "default"
 			}
-		},{
+		}, {
 			"path": "set/edit",
 			"style": {
 				"navigationBarTitleText": "设置-修改",
@@ -236,8 +236,28 @@
 				"navigationBarTitleText": "结果-编辑",
 				"navigationStyle": "default"
 			}
-		}
-		]
+		}]
+	}, {
+		"root": "pages/select",
+		"pages": [{
+			"path": "list",
+			"style": {
+				"navigationBarTitleText": "选股-列表",
+				"navigationStyle": "default"
+			}
+		}, {
+			"path": "add",
+			"style": {
+				"navigationBarTitleText": "选股-新增",
+				"navigationStyle": "default"
+			}
+		}, {
+			"path": "edit",
+			"style": {
+				"navigationBarTitleText": "选股-修改",
+				"navigationStyle": "default"
+			}
+		}]
 	}],
 	"globalStyle": {
 		"navigationStyle": "custom",
