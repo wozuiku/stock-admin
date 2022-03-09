@@ -2,19 +2,17 @@
 	<view class="uni-container">
 		<uni-forms ref="form" v-model="formData" @submit="submit">
 			<uni-forms-item name="strategy_code" label="选择策略">
-				<view class="strategy-picker">
+				<view class="strategy-picker-box">
 					<picker @change="strategyPickerChange" :value="strategyIndex" :range="strategyPicker">
 						<view class="picker">
 							{{strategyIndex>-1?strategyPicker[strategyIndex]:'点击选择'}}
 						</view>
 					</picker>
 				</view>
-
 			</uni-forms-item>
 			<uni-forms-item name="data_batch" label="数据批次">
-				<!-- <uni-easyinput v-model="formData.data_batch" :clearable="true" placeholder="请输入批次" /> -->
-				<view class="strategy-picker">
-					<picker @change="batchPickerChange" :value="batchIndex" :range="batchPicker">
+				<view class="strategy-picker-box">
+					<picker class="strategy-picker" @change="batchPickerChange" :value="batchIndex" :range="batchPicker">
 						<view class="picker">
 							{{batchIndex>-1?batchPicker[batchIndex]:'点击选择'}}
 						</view>
@@ -70,16 +68,15 @@
 
 		onLoad() {
 			this.init()
-
 		},
 
 		methods: {
 
 			async init() {
+				//初始化策略选择列表
 				let res = {}, setList = [], batchList = []
 				res = await db.collection('stock-strategy-set').get()
 				setList = res.result.data
-
 				setList.forEach((item, index) => {
 					if (!this.strategyPicker.includes(item.code)) {
 						this.strategyPicker.push(item.code)
@@ -88,17 +85,15 @@
 
 				console.log('setList:', setList);
 				console.log('this.strategyPicker:', this.strategyPicker);
-
-				res = await db.collection('stock-data-now').groupBy('batch').get()
-
+				
+				//初始化批次选择列表
+				res = await db.collection('stock-data-now').groupBy('batch').orderBy('batch', 'desc').get()
 				batchList = res.result.data
 				batchList.forEach((item, index) => {
 					this.batchPicker.push(item.batch)
 				})
-				
 
 				console.log('batchList:', batchList);
-
 			},
 
 			strategyPickerChange(e) {
@@ -123,8 +118,10 @@
 					errors
 				} = event.detail
 				console.log('submit value:', value);
-
+				
+				//获取执行批次
 				this.formData.execute_batch = await this.$batch.getBatchNo('EXEC')
+				//获取执行时间
 				this.formData.execute_time = new Date().format("yyyy-MM-dd hh:mm:ss");
 
 				if (this.formData.strategy_code == 'shadow') {
@@ -135,6 +132,7 @@
 				await this.insertStrategyExecute()
 			},
 
+			//执行长下影线策略
 			async strategyShadow() {
 				let res = {},
 					totalCount = 0, //表stock-code总记录数
@@ -170,9 +168,11 @@
 					//获取符合策略股票列表
 					strategyItemList = await this.getStrategyItems(dataList)
 					//将符合策略的股票列表插入到策略结果表
-					await this.insertStrategyResult(strategyItemList)
+					if(strategyItemList.length > 0){
+						await this.insertStrategyResult(strategyItemList)
+					}
 					
-					this.executeProcess = (1 + 1) * 10
+					this.executeProcess = (1 + i) * 10
 				}
 			},
 
@@ -209,57 +209,103 @@
 
 				strategy = await this.getStrategy()
 				console.log('getStrategyItems strategy:', strategy)
-				strategyUpper = parseInt(strategy.upper)
-				strategyBody = parseInt(strategy.body)
-				strategyLower = parseInt(strategy.lower)
+				//Math.round(num*100)/100 实现的功能为将浮点数四舍五入保留两位小数
+				strategyUpper = this.getDecimal(parseFloat(strategy.upper))
+				strategyBody = this.getDecimal(parseFloat(strategy.body))
+				strategyLower = this.getDecimal(parseFloat(strategy.lower))
+				
+				//console.log('getStrategyItems 1');
 
 				dataList.forEach((item, index) => {
 					code = item.code
 					name = item.name
-					high = item.high
-					low = item.low
-					open = item.open
-					price = item.price
+					
+					high = this.getDecimal(parseFloat(item.high))
+					low =  this.getDecimal(parseFloat(item.low))
+					open = this.getDecimal(parseFloat(item.open))
+					price = this.getDecimal(parseFloat(item.price))
+					
+					//console.log('getStrategyItems 2');
+					
+					console.log('code:', item.code, 'name:', item.name, 'high:', item.high, 'low:', item.low, 'open:', item.open, 'price:', item.price);
+					
+					//console.log('parseFloat(price):', parseFloat(price).toFixed(2), 'parseFloat(open):', parseFloat(open).toFixed(2));
+					
+					
 
-
-					if (parseInt(price) >= parseInt(open)) {
-						itemUpper = parseInt(high) - parseInt(price)
-						itemBody = parseInt(price) - parseInt(open)
-						itemLower = parseInt(open) - parseInt(low)
-						itemLength = parseInt(high) - parseInt(low)
+					if (price >= open) {
+						console.log('if');
+						itemUpper = this.getDecimal(high - price)
+						itemBody = this.getDecimal(price - open)
+						itemLower = this.getDecimal(open - low) 
+						itemLength = this.getDecimal(high - low)   
 					} else {
-						itemUpper = parseInt(high) - parseInt(open)
-						itemBody = parseInt(open) - parseInt(price)
-						itemLower = parseInt(price) - parseInt(low)
-						itemLength = parseInt(high) - parseInt(low)
+						console.log('else');
+						itemUpper = this.getDecimal(high - open)
+						itemBody = this.getDecimal(open - price) 
+						itemLower = this.getDecimal(price - low)
+						itemLength = this.getDecimal(high - low)   
 					}
-
-					itemLowerPercent = itemLower / itemLength
-					strategyLowerPercent = strategyLower / strategyLength
+					
+					//console.log('getStrategyItems 3');
+					
+					console.log('code:', item.code, 'name:', item.name, ' itemUpper:', itemUpper, ' itemBody:', itemBody, ' itemLower:', itemLower, ' itemLength:', itemLength);
+					
+					
+					itemLowerPercent = this.getDecimal(itemLower / itemLength) 
+					strategyLowerPercent = this.getDecimal(strategyLower / strategyLength)  
+					
+					console.log('code:', item.code, 'name:', item.name, ' itemLowerPercent:', itemLowerPercent, ' strategyLowerPercent:', strategyLowerPercent);
+					
+					
+					//console.log('getStrategyItems 4');
 
 					if (itemLowerPercent >= strategyLowerPercent) {
+						console.log('code:', item.code, 'name:', item.name, 'high:', item.high, 'low:', item.low, 'open:', item.open, 'price:', item.price);
+						console.log('itemLower:', itemLower, ' itemLength:', itemLength, ' itemLowerPercent:', itemLowerPercent);
+						console.log('strategyLower:', strategyLower, ' strategyLength:', strategyLength, ' strategyLowerPercent:', strategyLowerPercent);
+						
 						strategyItemList.push(item)
 					}
 				})
+				
+				//console.log('getStrategyItems 6');
+				
+				
 
 				return strategyItemList
+			},
+			
+			getDecimal(floatNum){
+				
+				return Math.round(floatNum * 100) / 100
+				
 			},
 
 
 			async insertStrategyExecute() {
+				
+				//console.log('insertStrategyExecute 1');
 				let strategyExecute = {}
 
 				strategyExecute.batch = this.formData.execute_batch
 				strategyExecute.strategy_code = this.formData.strategy_code
 				strategyExecute.execute_time = this.formData.execute_time
+				
+				//console.log('insertStrategyExecute 2');
 
 				await db.collection('stock-strategy-execute').add(strategyExecute)
+				
+				//console.log('insertStrategyExecute 3');
 			},
 
 
 			async insertStrategyResult(strategyItemList) {
+				
+				//console.log('insertStrategyResult 1');
 				let strategyResultItem = {},
-					strategyResultList = []
+					strategyResultList = [],
+					res = {}
 
 				strategyItemList.forEach((item, index) => {
 					strategyResultItem = {}
@@ -272,8 +318,14 @@
 					strategyResultItem.execute_time = this.formData.execute_time
 					strategyResultList.push(strategyResultItem)
 				})
+				
+				//console.log('insertStrategyResult 2');
+				//console.log('insertStrategyResult strategyResultList:', strategyResultList);
 
-				await db.collection('stock-strategy-result').add(strategyResultList)
+				res = await db.collection('stock-strategy-result').add(strategyResultList)
+				
+				//console.log('insertStrategyResult 3');
+				//console.log('insertStrategyResult res:', res);
 			},
 
 			async getStrategy() {
@@ -335,11 +387,16 @@
 </script>
 
 <style lang="scss" scoped>
-	.strategy-picker {
-		width: 680px;
+	.strategy-picker-box {
+		width: 440px;
 		display: flex;
 		align-items: center;
 		height: 36px;
-
+		
+		
 	}
 </style>
+
+
+
+

@@ -62,3 +62,9 @@
 	@import "uni_modules/colorui/main.css";
 	@import "uni_modules/colorui/icon.css";
 </style>
+<style>
+	.uni-picker-container .uni-picker-custom{
+	    width: 180px;
+	    margin-left: 100px;
+	}
+</style>
