@@ -172,7 +172,7 @@
 						await this.insertStrategyResult(strategyItemList)
 					}
 					
-					this.executeProcess = (1 + i) * 10
+					this.executeProcess = ((1 + i) / totalPage) * 100
 				}
 			},
 
@@ -225,12 +225,6 @@
 					open = this.getDecimal(parseFloat(item.open))
 					price = this.getDecimal(parseFloat(item.price))
 					
-					//console.log('getStrategyItems 2');
-					
-					console.log('code:', item.code, 'name:', item.name, 'high:', item.high, 'low:', item.low, 'open:', item.open, 'price:', item.price);
-					
-					//console.log('parseFloat(price):', parseFloat(price).toFixed(2), 'parseFloat(open):', parseFloat(open).toFixed(2));
-					
 					
 
 					if (price >= open) {
@@ -247,39 +241,21 @@
 						itemLength = this.getDecimal(high - low)   
 					}
 					
-					//console.log('getStrategyItems 3');
-					
-					console.log('code:', item.code, 'name:', item.name, ' itemUpper:', itemUpper, ' itemBody:', itemBody, ' itemLower:', itemLower, ' itemLength:', itemLength);
-					
-					
 					itemLowerPercent = this.getDecimal(itemLower / itemLength) 
 					strategyLowerPercent = this.getDecimal(strategyLower / strategyLength)  
 					
-					console.log('code:', item.code, 'name:', item.name, ' itemLowerPercent:', itemLowerPercent, ' strategyLowerPercent:', strategyLowerPercent);
-					
-					
-					//console.log('getStrategyItems 4');
-
 					if (itemLowerPercent >= strategyLowerPercent) {
-						console.log('code:', item.code, 'name:', item.name, 'high:', item.high, 'low:', item.low, 'open:', item.open, 'price:', item.price);
-						console.log('itemLower:', itemLower, ' itemLength:', itemLength, ' itemLowerPercent:', itemLowerPercent);
-						console.log('strategyLower:', strategyLower, ' strategyLength:', strategyLength, ' strategyLowerPercent:', strategyLowerPercent);
 						
 						strategyItemList.push(item)
 					}
 				})
 				
-				//console.log('getStrategyItems 6');
-				
-				
-
 				return strategyItemList
 			},
 			
+			//将浮点数四舍五入保留两位小数
 			getDecimal(floatNum){
-				
 				return Math.round(floatNum * 100) / 100
-				
 			},
 
 
