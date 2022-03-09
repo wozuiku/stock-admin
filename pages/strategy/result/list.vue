@@ -45,8 +45,8 @@
 						<uni-td align="center">{{item.execute_time}}</uni-td>
 						<uni-td align="center">
 							<view class="uni-group">
-								<button @click="navigateTo('./edit?id='+item._id, false)" class="uni-button" size="mini"
-									type="primary">{{$t('common.button.edit')}}</button>
+								<button @click="addSelect(item)" class="uni-button" size="mini"
+									type="primary">{{$t('common.button.addSelect')}}</button>
 								<button @click="confirmDelete(item._id)" class="uni-button" size="mini"
 									type="warn">{{$t('common.button.delete')}}</button>
 							</view>
@@ -160,6 +160,25 @@
 				this.$refs.udb.loadData({
 					clear
 				})
+			},
+			
+			async addSelect(item){
+				console.log('addSelect');
+				let selectItem = {}
+				selectItem.type = item.strategy_code
+				selectItem.code = item.stock_code
+				selectItem.name = item.stock_name
+				selectItem.date = this.getDate()
+				
+				let res = await db.collection('stock-select').add(selectItem)
+				console.log('res:', res);
+				if(res.result.code == 0){
+					uni.showToast({
+						'title': '添加成功',
+						'icon': 'none'
+					})
+				}
+				
 			},
 			
 			confirmDelete(id) {

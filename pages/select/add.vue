@@ -1,83 +1,124 @@
 <template>
-	<view class="uni-container">
-		<uni-forms ref="form" v-model="formData" @submit="submit">
-			<uni-forms-item name="code" label="策略代码">
-				<uni-easyinput v-model="formData.code" :clearable="true" placeholder="请输入策略代码" />
-			</uni-forms-item>
-			<uni-forms-item name="name" label="策略名称">
-				<uni-easyinput v-model="formData.name" :clearable="true" placeholder="请输入策略名称" />
-			</uni-forms-item>
-			<uni-forms-item name="no" label="编号">
-				<uni-easyinput v-model="formData.no" :clearable="true" placeholder="请输入编号" />
-			</uni-forms-item>
-			<uni-forms-item name="field" label="字段">
-				<uni-easyinput v-model="formData.field" :clearable="true" placeholder="请输入字段" />
-			</uni-forms-item>
-			<uni-forms-item name="value" label="值">
-				<uni-easyinput v-model="formData.value" :clearable="true" placeholder="请输入值" />
-			</uni-forms-item>
-			<uni-forms-item name="operator" label="操作符">
-				<uni-easyinput v-model="formData.operator" :clearable="true" placeholder="请输入操作符" />
-			</uni-forms-item>
-			<view class="uni-button-group">
-				<button style="width: 100px;" type="primary" class="uni-button"
-					@click="submitForm">{{$t('common.button.submit')}}</button>
-				<navigator open-type="navigateBack" style="margin-left: 15px;"><button style="width: 100px;"
-						class="uni-button">{{$t('common.button.back')}}</button></navigator>
+	<view>
+		<view class="uni-header">
+			<view class="uni-group">
+				<input class="uni-search" type="text" v-model="query" @confirm="search"
+					:placeholder="$t('common.placeholder.query')" />
+				<button class="uni-button" type="default" size="mini"
+					@click="search">{{$t('common.button.search')}}</button>
+				
 			</view>
-		</uni-forms>
+		</view>
+
+		<view class="uni-container">
+			<unicloud-db ref="udb" collection="stock-code"
+				field="code,name, exchange, source_code" :where="where"
+				:getcount="true" :page-size="options.pageSize" :page-current="options.pageCurrent"
+				v-slot:default="{data,pagination, loading, error, options}">
+				<uni-table ref="table" :loading="loading" :emptyText="error.message || $t('common.empty')" border stripe
+					type="selection" @selection-change="selectionChange">
+
+					<uni-tr>
+						<uni-th align="center">代码</uni-th>
+						<uni-th align="center">名称</uni-th>
+						<uni-th align="center">交易所</uni-th>
+						<uni-th align="center">原始码</uni-th>
+						<uni-th align="center">操作</uni-th>
+					</uni-tr>
+					<uni-tr v-for="(item,index) in data" :key="index">
+						<uni-td align="center">{{item.code}}</uni-td>
+						<uni-td align="center">{{item.name}}</uni-td>
+						<uni-td align="center">{{item.exchange}}</uni-td>
+						<uni-td align="center">{{item.source_code}}</uni-td>
+						<uni-td align="center">
+							<view class="uni-group">
+								<button @click="addSelect(item)" class="uni-button" size="mini"
+									type="primary">{{$t('common.button.addSelect')}}</button>
+								
+							</view>
+						</uni-td>
+					</uni-tr>
+				</uni-table>
+				<view class="uni-pagination-box">
+					<!-- #ifndef MP -->
+					<picker class="select-picker" mode="selector" :value="pageSizeIndex" :range="pageSizeOption"
+						@change="changeSize">
+						<button type="default" size="mini" :plain="true">
+							<text>{{pageSizeOption[pageSizeIndex]}} {{$t('common.piecePerPage')}}</text>
+							<uni-icons class="select-picker-icon" type="arrowdown" size="12" color="#999"></uni-icons>
+						</button>
+					</picker>
+					<!-- #endif -->
+					<uni-pagination show-icon :page-size="pagination.size" v-model="pagination.current"
+						:total="pagination.count" @change="onPageChanged" />
+				</view>
+			</unicloud-db>
+
+		</view>
 	</view>
 </template>
 
 <script>
+	//const dbSearchFields = ['code', 'name', 'no', 'field', 'value', 'operator'] // 支持模糊搜索的字段列表
+	const dbOrderBy = 'code asc' // 排序字段
+	const dbSearchFields = ['code', 'name' , 'exchange', 'source_code'] // 支持模糊搜索的字段列表
+	
+	const pageSize = 10
+	const pageCurrent = 1
+	
 	const db = uniCloud.database();
 	const dbCmd = db.command;
-	const dbCollectionName = 'stock-strategy-set';
 
 	export default {
 		data() {
 			return {
-				formData: {
-					code: '',
-					name: '',
-					no: '',
-					field: '',
-					value: '',
-					operator: ''
+				query: '',
+				where: '',
+				selectedIndexs: [],
+				pageSizeIndex: 0,
+				pageSizeOption: [10, 20, 50, 100, 500],
+
+				options: {
+					pageSize,
+					pageCurrent,
+				},
+			}
+		},
+
+		watch: {
+			pageSizeIndex: {
+				immediate: true,
+				handler(val, old) {
+					this.options.pageSize = this.pageSizeOption[val]
+					this.options.pageCurrent = 1
+					this.$nextTick(() => {
+						this.loadData()
+					})
 				}
 			}
 		},
 
 		methods: {
 
-			submitForm() {
-				this.$refs.form.submit();
-			},
-
-			submit(event) {
-				const {
-					value,
-					errors
-				} = event.detail
-				console.log('submit value:', value);
-
-
-				db.collection('stock-strategy-set').add(value).then((res) => {
-						console.log('submit add res.result.code:', res.result.code);
-						if(res.result.code == 0){
-							uni.showToast({
-							    title: '新增成功',
-							    duration: 2000
-							});
-							
-							this.navigateTo('./list')
-						}
-					})
-					.catch((err) => {
-
-					})
+			search() {
+				const newWhere = this.getWhere()
+				this.where = newWhere
+				console.log('search:', this.where);
+				// 下一帧拿到查询条件
+				this.$nextTick(() => {
+					this.loadData()
+				})
 			},
 			
+			getWhere() {
+				const query = this.query.trim()
+				if (!query) {
+					return ''
+				}
+				const queryRe = new RegExp(query, 'i')
+				return dbSearchFields.map(name => queryRe + '.test(' + name + ')').join(' || ')
+			},
+
 			navigateTo(url, clear) {
 				console.log('navigateTo url:', url);
 				// clear 表示刷新列表时是否清除页码，true 表示刷新并回到列表第 1 页，默认为 true
@@ -90,10 +131,105 @@
 					}
 				})
 			},
+			
+			getDate() {
+				const date = new Date();
+				let year = date.getFullYear();
+				let month = date.getMonth() + 1;
+				let day = date.getDate();
+			
+				month = month > 9 ? month : '0' + month;
+				day = day > 9 ? day : '0' + day;
+				return `${year}-${month}-${day}`;
+			},
+			
+			
+			loadData(clear = true) {
+				this.$refs.udb.loadData({
+					clear
+				})
+			},
+			
+			async addSelect(item){
+				console.log('addSelect');
+				let selectItem = {}
+				selectItem.type = '人工选择'
+				selectItem.code = item.code
+				selectItem.name = item.name
+				selectItem.date = this.getDate()
+				
+				let res = await db.collection('stock-select').add(selectItem)
+				console.log('res:', res);
+				if(res.result.code == 0){
+					uni.showToast({
+						'title': '添加成功',
+						'icon': 'none'
+					})
+				}
+			},
+			
+			confirmDelete(id) {
+				this.$refs.udb.remove(id, {
+					success: (res) => {
+						this.$refs.table.clearSelection()
+					}
+				})
+			},
+			
+			// 多选处理
+			selectedItems() {
+				var dataList = this.$refs.udb.dataList
+				return this.selectedIndexs.map(i => dataList[i]._id)
+			},
+			
+			// 批量删除
+			delTable() {
+				this.$refs.udb.remove(this.selectedItems(), {
+					success: (res) => {
+						this.$refs.table.clearSelection()
+					}
+				})
+			},
 
-		},
+			// 多选
+			selectionChange(e) {
+				this.selectedIndexs = e.detail.index
+			},
+
+			changeSize(e) {
+				this.pageSizeIndex = e.detail.value
+			},
+
+			onPageChanged(e) {
+				this.selectedIndexs.length = 0
+				this.$refs.table.clearSelection()
+				this.$refs.udb.loadData({
+					current: e.current
+				})
+			},
+
+			
+					
+					
+		}
 	}
 </script>
 
-<style>
+<style lang="scss" scoped>
+	.del-modal-action {
+		display: flex;
+		justify-content: space-between;
+		width: 100%;
+
+		.left {
+			flex: 40%;
+		}
+
+		.right {
+			flex: 60%;
+			display: flex;
+			justify-content: flex-end;
+		}
+
+	}
 </style>
