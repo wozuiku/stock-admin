@@ -7,7 +7,7 @@
 				<button class="uni-button" type="default" size="mini"
 					@click="search">{{$t('common.button.search')}}</button>
 				<button class="uni-button" type="primary" size="mini"
-					@click="navigateTo('./add')">{{$t('common.button.add')}}</button>
+					@click="batchAddSelect">{{$t('common.button.batchAddSelect')}}</button>
 				<button class="uni-button" type="warn" size="mini"
 					@click="delTable">{{$t('common.button.batchDelete')}}</button>
 				<button class="uni-button" type="warn" size="mini"
@@ -129,6 +129,32 @@
 				}
 				const queryRe = new RegExp(query, 'i')
 				return dbSearchFields.map(name => queryRe + '.test(' + name + ')').join(' || ')
+			},
+			
+			async batchAddSelect(){
+				let selectItem = {}, selectList = [], dataList = [], today = this.getDate()
+				dataList = this.$refs.udb.dataList
+				
+				dataList.forEach((item, index) => {
+					selectItem = {}
+					selectItem.type = item.strategy_code
+					selectItem.code = item.stock_code
+					selectItem.name = item.stock_name
+					selectItem.date = today
+					
+					selectList.push(selectItem)
+				})
+				
+				console.log('batchAddSelect selectList:', selectList);
+				
+				let res = await db.collection('stock-select').add(selectList)
+				console.log('res:', res);
+				if(res.result.code == 0){
+					uni.showToast({
+						'title': '批量添加成功',
+						'icon': 'none'
+					})
+				}
 			},
 
 			navigateTo(url, clear) {

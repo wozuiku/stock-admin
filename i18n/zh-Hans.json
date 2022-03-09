@@ -49,6 +49,7 @@
 		"button": {
 			"search": "搜索",
 			"add": "新增",
+			"batchAddSelect": "批量加入自选",
 			"edit": "修改",
 			"addSelect": "加入自选",
 			"delete": "删除",
