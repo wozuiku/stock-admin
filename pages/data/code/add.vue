@@ -1,10 +1,10 @@
 <template>
 	<view class="uni-container">
 		<uni-forms ref="form" v-model="formData" @submit="submit">
-			<uni-forms-item name="code" label="代码">
+			<uni-forms-item name="code" label="代码" required>
 				<uni-easyinput v-model="formData.code" :clearable="true" placeholder="请输入代码" />
 			</uni-forms-item>
-			<uni-forms-item name="name" label="名称">
+			<uni-forms-item name="name" label="名称" required>
 				<uni-easyinput v-model="formData.name" :clearable="true" placeholder="请输入名称" />
 			</uni-forms-item>
 			<uni-forms-item name="exchange" label="交易所">

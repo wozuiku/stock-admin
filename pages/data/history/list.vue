@@ -14,29 +14,39 @@
 		</view>
 
 		<view class="uni-container">
-			<unicloud-db ref="udb" collection="stock-strategy-set"
-				field="code,name,no,field,value,operator" :where="where"
+			<unicloud-db ref="udb" collection="stock-data-history"
+				field="batch,code,name,date,close,high,low,open,bargain_volume,bargain_amount,time" :where="where"
 				:getcount="true" :page-size="options.pageSize" :page-current="options.pageCurrent"
 				v-slot:default="{data,pagination, loading, error, options}">
 				<uni-table ref="table" :loading="loading" :emptyText="error.message || $t('common.empty')" border stripe
 					type="selection" @selection-change="selectionChange">
 
 					<uni-tr>
-						<uni-th align="center">策略代码</uni-th>
-						<uni-th align="center">策略名称</uni-th>
-						<uni-th align="center">编号</uni-th>
-						<uni-th align="center">字段</uni-th>
-						<uni-th align="center">值</uni-th>
-						<uni-th align="center">操作符</uni-th>
+						<uni-th align="center">批次</uni-th>
+						<uni-th align="center">股票代码</uni-th>
+						<uni-th align="center">股票名称</uni-th>
+						<uni-th align="center">股票日期</uni-th>
+						<uni-th align="center">收盘价</uni-th>
+						<uni-th align="center">最高价</uni-th>
+						<uni-th align="center">最低价</uni-th>
+						<uni-th align="center">开盘价</uni-th>
+						<uni-th align="center">成交量</uni-th>
+						<uni-th align="center">成交额</uni-th>
+						<uni-th align="center">同步时间</uni-th>
 						<uni-th align="center">操作</uni-th>
 					</uni-tr>
 					<uni-tr v-for="(item,index) in data" :key="index">
+						<uni-td align="center">{{item.batch}}</uni-td>
 						<uni-td align="center">{{item.code}}</uni-td>
 						<uni-td align="center">{{item.name}}</uni-td>
-						<uni-td align="center">{{item.no}}</uni-td>
-						<uni-td align="center">{{item.field}}</uni-td>
-						<uni-td align="center">{{item.value}}</uni-td>
-						<uni-td align="center">{{item.operator}}</uni-td>
+						<uni-td align="center">{{item.date}}</uni-td>
+						<uni-td align="center">{{item.close}}</uni-td>
+						<uni-td align="center">{{item.high}}</uni-td>
+						<uni-td align="center">{{item.low}}</uni-td>
+						<uni-td align="center">{{item.open}}</uni-td>
+						<uni-td align="center">{{item.bargain_volume}}</uni-td>
+						<uni-td align="center">{{item.bargain_amount}}</uni-td>
+						<uni-td align="center">{{item.time}}</uni-td>
 						<uni-td align="center">
 							<view class="uni-group">
 								<button @click="navigateTo('./edit?id='+item._id, false)" class="uni-button" size="mini"
@@ -67,7 +77,8 @@
 </template>
 
 <script>
-	const dbSearchFields = ['code', 'name', 'no', 'field', 'value', 'operator'] // 支持模糊搜索的字段列表
+	//batch,code,name,date,close,high,low,open,bargain_volume,bargain_amount,time
+	const dbSearchFields = ['batch', 'code', 'name', 'date', 'close', 'high', 'low', 'open', 'bargain_volume', 'bargain_amount', 'time'] // 支持模糊搜索的字段列表
 	
 	const pageSize = 10
 	const pageCurrent = 1
@@ -193,9 +204,6 @@
 				})
 			},
 
-			
-					
-					
 		}
 	}
 </script>

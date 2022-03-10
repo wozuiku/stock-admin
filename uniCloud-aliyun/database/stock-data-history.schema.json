@@ -23,8 +23,8 @@
 		"date": {
 			"description": "date"
 		},
-		"price": {
-			"description": "price"
+		"close": {
+			"description": "close"
 		},
 		"high": {
 			"description": "high"

@@ -7,7 +7,7 @@
 			<uni-forms-item name="name" label="名称" required>
 				<uni-easyinput v-model="formData.name" :clearable="true" placeholder="请输入名称" />
 			</uni-forms-item>
-			<uni-forms-item name="exchange" label="交易所" required>
+			<uni-forms-item name="exchange" label="交易所">
 				<uni-easyinput v-model="formData.exchange" :clearable="true" placeholder="请输入交易所" />
 			</uni-forms-item>
 			<uni-forms-item name="source_code" label="原始码">
