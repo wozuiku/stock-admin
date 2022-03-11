@@ -17,11 +17,14 @@ exports.main = async (event, context) => {
 	console.log('event : ', event)
 
 	
+	var buf = new Buffer("test测试","utf8");
+	console.log(buf);
+	console.log(buf.length);
+	console.log(buf.toString("utf8"));
 	
 	
 	
-	
-	downloadCsv('301119', '20201124', '20211124')
+	//downloadCsv('301119', '20201124', '20211124')
 	
 	//parseCsv('301119')
 	

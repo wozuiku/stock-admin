@@ -176,7 +176,7 @@
 		}, {
 			"path": "history/add",
 			"style": {
-				"navigationBarTitleText": "新增历史数据",
+				"navigationBarTitleText": "获取历史数据",
 				"navigationStyle": "default"
 			}
 		},{
