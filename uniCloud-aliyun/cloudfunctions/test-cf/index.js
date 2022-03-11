@@ -1,53 +1,79 @@
 'use strict';
 const db = uniCloud.database();
 const dbCmd = db.command
+
+const fs = require('fs')
+const download = require('download')
+
+// let url='https://pic3.zhimg.com/v2-c34d75f9479479c59055d16b1940e86b_xll.jpg'
+// ;(async()=>{
+//     let data = await download(url)
+//     await fs.promises.writeFile('./ツキ.jpg',data)
+// })()
+
+
 exports.main = async (event, context) => {
 	//event为客户端上传的参数
 	console.log('event : ', event)
 
-
-	// let res = await db.collection('stock-code').where({
-	// 	code: dbCmd.exists(false)
-	// }).limit(500).get()
-
-	// let stockList = res.data
-
-	// console.log('res:', res);
-	// console.log('stockList:', stockList);
-
-	// updateStockAll(stockList)
-
-
-	// async function updateStockAll(stockList) {
-	// 	await stockList.forEach((item, index) => {
-	// 		let exchange = item.source_code.substring(0, 2)
-	// 		let code = item.source_code.substring(2, item.source_code.length)
-	// 		console.log('item:', item, 'id:', item._id, 'exchange:', exchange, 'code:', code);
-
-	// 		await updateStock(item._id, exchange, code)
+	
+	
+	
+	
+	
+	downloadCsv('301119', '20201124', '20211124')
+	
+	//parseCsv('301119')
+	
+	async function downloadCsv(stockCode, startDate, endDate){
+		let fileUrl = 'http://quotes.money.163.com/service/chddata.html'
+		let saveName = './data/history/' + stockCode +'.csv'
+		
+		if(stockCode > '600000'){
+			fileUrl = fileUrl + "?code=0" + stockCode + "&start=" + startDate + "&end=" + endDate;
+		}else{
+			fileUrl = fileUrl + "?code=1" + stockCode + "&start=" + startDate + "&end=" + endDate;
+		}
+		
+		let data = await download(fileUrl)
+		await fs.promises.writeFile(saveName, data, {encoding: 'utf8'})
+	}
+	
+	
+	
+	function parseCsv(stockCode){
+		let csvName = './data/history/' + stockCode +'.csv'
+		
+		fs.readFile(csvName, 'utf8', function (err, data) {
+			let table = new Array();
+		    if (err) return console.error(err);
 			
-	// 	})
-	// }
-
-
-
-
-	// //updateStock('621594d3f78f3f3a4d8a7107', 'SZ', '000860')
-	// async function updateStock(id, exchange, code) {
-	// 	await db.collection("stock-code").where({
-	// 			_id: id
-	// 		})
-	// 		.update({
-	// 			exchange: exchange,
-	// 			code: code
-	// 		});
-	// }
+			console.log('data:', data);
+			
+			// let rows = data.split("\r\n");
+			
+			// rows.forEach((item, index) => {
+			// 	console.log('item:', item);
+			// })
+		
+		    ConvertToTable(data, function (table) {
+		        console.log(table);
+		    })
+		});
+		
+	}
 	
-	
-	let res = await db.collection('stock-data-now').where({
-	  _id: dbCmd.exists(true)
-	}).remove()
-
+	function ConvertToTable(data, callBack) {
+	    data = data.toString();
+	    var table = new Array();
+	    var rows = new Array();
+	    rows = data.split("\r\n");
+	    for (var i = 0; i < rows.length; i++) {
+			console.log('rows[i]:', rows[i]);
+	        table.push(rows[i].split(","));
+	    }
+	    callBack(table);
+	}
 
 	//返回数据给客户端
 	return event
