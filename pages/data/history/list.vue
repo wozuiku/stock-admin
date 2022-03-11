@@ -15,7 +15,7 @@
 
 		<view class="uni-container">
 			<unicloud-db ref="udb" collection="stock-data-history"
-				field="batch,code,name,date,close,high,low,open,bargain_volume,bargain_amount,time" :where="where"
+				field="batch,code,name,date,close,high,low,open,pre_close,up_down_amount,up_down_range,turn_over_rate,bargain_volume,bargain_amount,total_market_value,flow_market_value,bargain_ticket_count,time" :where="where"
 				:getcount="true" :page-size="options.pageSize" :page-current="options.pageCurrent"
 				v-slot:default="{data,pagination, loading, error, options}">
 				<uni-table ref="table" :loading="loading" :emptyText="error.message || $t('common.empty')" border stripe
@@ -30,8 +30,15 @@
 						<uni-th align="center">最高价</uni-th>
 						<uni-th align="center">最低价</uni-th>
 						<uni-th align="center">开盘价</uni-th>
+						<uni-th align="center">前收盘</uni-th>
+						<uni-th align="center">涨跌额</uni-th>
+						<uni-th align="center">涨跌幅</uni-th>
+						<uni-th align="center">换手率</uni-th>
 						<uni-th align="center">成交量</uni-th>
-						<uni-th align="center">成交额</uni-th>
+						<uni-th align="center">成交金额</uni-th>
+						<uni-th align="center">总市值</uni-th>
+						<uni-th align="center">流通市值</uni-th>
+						<uni-th align="center">成交笔数</uni-th>
 						<uni-th align="center">同步时间</uni-th>
 						<uni-th align="center">操作</uni-th>
 					</uni-tr>
@@ -44,13 +51,18 @@
 						<uni-td align="center">{{item.high}}</uni-td>
 						<uni-td align="center">{{item.low}}</uni-td>
 						<uni-td align="center">{{item.open}}</uni-td>
+						<uni-td align="center">{{item.pre_close}}</uni-td>
+						<uni-td align="center">{{item.up_down_amount}}</uni-td>
+						<uni-td align="center">{{item.up_down_range}}</uni-td>
+						<uni-td align="center">{{item.turn_over_rate}}</uni-td>
 						<uni-td align="center">{{item.bargain_volume}}</uni-td>
 						<uni-td align="center">{{item.bargain_amount}}</uni-td>
+						<uni-td align="center">{{item.total_market_value}}</uni-td>
+						<uni-td align="center">{{item.flow_market_value}}</uni-td>
+						<uni-td align="center">{{item.bargain_ticket_count}}</uni-td>
 						<uni-td align="center">{{item.time}}</uni-td>
 						<uni-td align="center">
 							<view class="uni-group">
-								<button @click="navigateTo('./edit?id='+item._id, false)" class="uni-button" size="mini"
-									type="primary">{{$t('common.button.edit')}}</button>
 								<button @click="confirmDelete(item._id)" class="uni-button" size="mini"
 									type="warn">{{$t('common.button.delete')}}</button>
 							</view>
@@ -78,7 +90,7 @@
 
 <script>
 	//batch,code,name,date,close,high,low,open,bargain_volume,bargain_amount,time
-	const dbSearchFields = ['batch', 'code', 'name', 'date', 'close', 'high', 'low', 'open', 'bargain_volume', 'bargain_amount', 'time'] // 支持模糊搜索的字段列表
+	const dbSearchFields = ['batch', 'code', 'name', 'date', 'close', 'high', 'low', 'open', 'pre_close','up_down_amount','up_down_range','turn_over_rate','bargain_volume','bargain_amount','total_market_value','flow_market_value','bargain_ticket_count','time'] // 支持模糊搜索的字段列表
 	
 	const pageSize = 10
 	const pageCurrent = 1
