@@ -22,7 +22,7 @@
 		<view class="uni-container">
 			<unicloud-db ref="udb" collection="stock-data-now"
 				field="batch,time,date,code,name,price,high,low,open,pre_close,bargain_volume,bargain_amount" :where="where"
-				:getcount="true" :page-size="options.pageSize" :page-current="options.pageCurrent"
+				:orderby="orderby" :getcount="true" :page-size="options.pageSize" :page-current="options.pageCurrent"
 				v-slot:default="{data,pagination, loading, error, options}">
 				<uni-table ref="table" :loading="loading" :emptyText="error.message || $t('common.empty')" border stripe
 					type="selection" @selection-change="selectionChange">
@@ -141,6 +141,7 @@
 	const dbSearchFields = ['batch', 'time', 'date', 'code', 'name', 'price', 'high', 'low', 'open', 'pre_close',
 		'item.bargain_volume', 'bargain_amount'
 	] // 支持模糊搜索的字段列表
+	const dbOrderBy = 'batch desc' // 排序字段
 
 
 	const pageSize = 10
@@ -151,6 +152,7 @@
 			return {
 				query: '',
 				where: '',
+				orderby: dbOrderBy,
 				selectedIndexs: [],
 				pageSizeIndex: 0,
 				pageSizeOption: [10, 20, 50, 100, 500],
