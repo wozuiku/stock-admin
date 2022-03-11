@@ -10,6 +10,8 @@
 					@click="navigateTo('./add')">{{$t('common.button.add')}}</button>
 				<button class="uni-button" type="warn" size="mini"
 					@click="delTable">{{$t('common.button.batchDelete')}}</button>
+				<button class="uni-button" type="warn" size="mini"
+					@click="delAll">{{$t('common.button.allDelete')}}</button>
 			</view>
 		</view>
 
@@ -89,7 +91,9 @@
 </template>
 
 <script>
-	//batch,code,name,date,close,high,low,open,bargain_volume,bargain_amount,time
+	const db = uniCloud.database();
+	const dbCmd = db.command;
+	
 	const dbSearchFields = ['batch', 'code', 'name', 'date', 'close', 'high', 'low', 'open', 'pre_close','up_down_amount','up_down_range','turn_over_rate','bargain_volume','bargain_amount','total_market_value','flow_market_value','bargain_ticket_count','time'] // 支持模糊搜索的字段列表
 	
 	const pageSize = 10
@@ -197,6 +201,14 @@
 						this.$refs.table.clearSelection()
 					}
 				})
+			},
+			
+			async delAll(){
+				let res = await db.collection('stock-data-history').where({
+					_id: dbCmd.exists(true)
+				}).remove()
+				
+				this.search()
 			},
 
 			// 多选

@@ -12,11 +12,22 @@ exports.main = async (event, context) => {
 	//console.log('event : ', event)
 	
 	const type = event.type
+	const code = event.code
+	const startDate = event.startDate.replace(/-/g, '')
+	const endDate = event.endDate.replace(/-/g, '')
 	const batch = event.batch
+	const time = event.time
+	console.log('参数: ')
+	console.log('type: ', type)
+	console.log('code: ', code)
+	console.log('startDate: ', startDate)
+	console.log('endDate: ', endDate)
+	console.log('batch: ', batch)
+	console.log('time: ', time)
 	
 
-	let csvData = await downloadData('002158', '20201124', '20211124')
-	let historyList = parseCsvData(batch, csvData)
+	let csvData = await downloadData(code, startDate, endDate)
+	let historyList = parseCsvData(batch, csvData, time)
 	let result = await insertDataHistory(historyList)
 	
 	
@@ -39,7 +50,7 @@ exports.main = async (event, context) => {
 		return csvData
 	}
 	
-	function parseCsvData(batch, csvData){
+	function parseCsvData(batch, csvData, time){
 		let rows = csvData.split('\r\n')
 		let item = {}, historyItem = {}, historyList = [], codeStr =''
 		rows.forEach((row, index) => {
@@ -52,8 +63,14 @@ exports.main = async (event, context) => {
 			
 			historyItem.batch = batch //批次
 			historyItem.date = item[0]//日期
-			//codeStr = item[1]
-			historyItem.code = item[1]//股票代码
+			
+			try{
+				historyItem.code = item[1].substr(1, item[1].length)//股票代码
+				console.log('code:', historyItem.code);
+			}catch(err){
+				console.log('err:', err);
+			}
+			
 			historyItem.name = item[2]//名称
 			historyItem.close = item[3]//收盘价
 			historyItem.high = item[4]//最高价
@@ -68,7 +85,7 @@ exports.main = async (event, context) => {
 			historyItem.total_market_value = item[13]//总市值
 			historyItem.flow_market_value = item[14]//流通市值
 			historyItem.bargain_ticket_count = item[15]//成交笔数
-			//historyItem.time = item[16]//同步时间
+			historyItem.time = time//同步时间
 			
 			//console.log('historyItem:', historyItem);
 			

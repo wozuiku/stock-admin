@@ -62,6 +62,7 @@
 					startDate: '',
 					endDate: '',
 					batch: '',
+					time: ''
 				},
 				
 				typeIndex: -1,
@@ -109,11 +110,19 @@
 				
 				this.formData.batch = await this.$batch.getBatchNo('HIS')
 				
+				//获取执行时间
+				this.formData.time = new Date().format("yyyy-MM-dd hh:mm:ss");
+				
 			
 			uniCloud.callFunction({
 					name: 'data-history-cf',
 					data: {
-						type: 'sync'
+						type: this.formData.type,
+						code: this.formData.code,
+						startDate: this.formData.startDate,
+						endDate: this.formData.endDate,
+						batch: this.formData.batch,
+						time: this.formData.time
 					}
 				})
 				.then(res => {
