@@ -7,7 +7,7 @@
 				<button class="uni-button" type="default" size="mini"
 					@click="search">{{$t('common.button.search')}}</button>
 				<button class="uni-button" type="primary" size="mini"
-					@click="navigateTo('./add')">{{$t('common.button.add')}}</button>
+					@click="navigateTo('./add')">{{$t('common.button.sync')}}</button>
 				<button class="uni-button" type="warn" size="mini"
 					@click="delTable">{{$t('common.button.batchDelete')}}</button>
 				<button class="uni-button" type="warn" size="mini"

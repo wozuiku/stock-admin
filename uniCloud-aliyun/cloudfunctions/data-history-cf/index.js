@@ -25,11 +25,17 @@ exports.main = async (event, context) => {
 	console.log('batch: ', batch)
 	console.log('time: ', time)
 	
-
-	let csvData = await downloadData(code, startDate, endDate)
-	let historyList = parseCsvData(batch, csvData, time)
-	let result = await insertDataHistory(historyList)
+	if(type == 'sync'){
+		await syncHistoryData(code, startDate, endDate, batch, time)
+	}
 	
+	
+	
+	async function syncHistoryData(code, startDate, endDate, batch, time){
+		let csvData = await downloadData(code, startDate, endDate)
+		let historyList = parseCsvData(batch, csvData, time)
+		let result = await insertDataHistory(historyList)
+	}
 	
 	async function downloadData(stockCode, startDate, endDate){
 		
