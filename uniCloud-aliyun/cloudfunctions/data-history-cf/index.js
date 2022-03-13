@@ -11,22 +11,29 @@ exports.main = async (event, context) => {
 	//event为客户端上传的参数
 	//console.log('event : ', event)
 	
-	const type = event.type
-	const code = event.code
+	const busiType = event.busiType //业务类型
+	const syncType = event.syncType //同步类型：分页
+	const dataList = event.dataList
 	const startDate = event.startDate.replace(/-/g, '')
 	const endDate = event.endDate.replace(/-/g, '')
 	const batch = event.batch
 	const time = event.time
 	console.log('参数: ')
-	console.log('type: ', type)
-	console.log('code: ', code)
+	console.log('busiType: ', busiType)
+	console.log('syncType: ', syncType)
+	console.log('dataList: ', dataList)
 	console.log('startDate: ', startDate)
 	console.log('endDate: ', endDate)
 	console.log('batch: ', batch)
 	console.log('time: ', time)
 	
-	if(type == 'sync'){
-		await syncHistoryData(code, startDate, endDate, batch, time)
+	if(busiType == 'sync'){
+		if(syncType == 'page'){
+			dataList.forEach((item, index) => {
+				syncHistoryData(item.code, startDate, endDate, batch, time)
+			})
+		}
+		
 	}
 	
 	

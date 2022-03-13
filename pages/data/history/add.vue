@@ -23,7 +23,6 @@
 				</view>
 			</uni-forms-item>
 			<uni-forms-item name="endDate" label="截止时间">
-
 				<view class="picker-box">
 					<picker mode="date" :value="formData.endDate" @change="endDateChange">
 						<view class="picker">
@@ -38,9 +37,10 @@
 			<uni-forms-item name="process" label="同步进度">
 				<slider :value="process" show-value></slider>
 			</uni-forms-item>
+			
 			<view class="uni-button-group">
 				<button style="width: 100px;" type="primary" class="uni-button"
-					@click="submitForm">{{$t('common.button.submit')}}</button>
+					@click="submitForm">开始同步</button>
 				<navigator open-type="navigateBack" style="margin-left: 15px;"><button style="width: 100px;"
 						class="uni-button">{{$t('common.button.back')}}</button></navigator>
 			</view>
@@ -62,6 +62,7 @@
 					startDate: '',
 					endDate: '',
 					batch: '',
+					message: '',
 					time: ''
 				},
 
@@ -151,7 +152,7 @@
 				totalPage = Math.ceil(totalCount / pageSize)
 				
 				//初始lastId默认为第一条记录_id
-				res = await db.collection('stock-data-now').limit(1).orderBy("_id", "asc").get()
+				res = await db.collection('stock-code').limit(1).orderBy("_id", "asc").get()
 				//console.log('strategyShadow res:', res);
 				lastId = res.result.data[0]._id
 				console.log('totalCount:', totalCount, 'totalPage:', totalPage, 'lastId:', lastId);
@@ -161,15 +162,49 @@
 					console.log('当前分页:', i);
 					//分页获取实时数据
 					pageObj = await this.getDataByPage(i, lastId, pageSize)
-					//dataList = pageObj.dataList
-					//lastId = pageObj.lastId
-					//console.log('dataList:', dataList);
-					//获取符合策略股票列表
-					//strategyItemList = await this.getStrategyItems(dataList)
-					//将符合策略的股票列表插入到策略结果表
-					//if(strategyItemList.length > 0){
-						//await this.insertStrategyResult(strategyItemList)
-					//}
+					dataList = pageObj.dataList
+					lastId = pageObj.lastId
+					console.log('dataList:', dataList);
+					//获取股票历史数据
+					//await this.getHistoryData(dataList)
+					
+					//
+					// if(i == 0){
+					// 	uniCloud.callFunction({
+					// 			name: 'data-history-cf',
+					// 			data: {
+					// 				busiType: 'sync', //业务类型
+					// 				syncType: 'page', //同步类型
+					// 				//code: item.code,
+					// 				dataList: dataList,
+					// 				startDate: this.formData.startDate,
+					// 				endDate: this.formData.endDate,
+					// 				batch: this.formData.batch,
+					// 				time: this.formData.time
+					// 			}
+					// 		})
+					// 		.then(res => {
+					// 			console.log('data-history-cf res:', res);
+						
+					// 		});
+					// }
+					uniCloud.callFunction({
+							name: 'data-history-cf',
+							data: {
+								busiType: 'sync', //业务类型
+								syncType: 'page', //同步类型
+								//code: item.code,
+								dataList: dataList,
+								startDate: this.formData.startDate,
+								endDate: this.formData.endDate,
+								batch: this.formData.batch,
+								time: this.formData.time
+							}
+						})
+						.then(res => {
+							console.log('data-history-cf res:', res);
+					
+						});
 					
 					this.process = ((1 + i) / totalPage) * 100
 				}
@@ -183,6 +218,8 @@
 				let res = {}
 				let pageObj = {}
 			
+				console.log('currentPageNo:', currentPageNo, 'lastId:', lastId, 'pageSize:', pageSize);
+				
 				if (currentPageNo == 0) {
 					res = await db.collection('stock-code').where({
 						_id: dbCmd.gte(lastId)
@@ -200,9 +237,34 @@
 				if(listCount > 0){
 					pageObj.lastId = res.result.data[listCount - 1]._id
 					pageObj.dataList = res.result.data
-								
-					return pageObj
 				}
+				
+				return pageObj
+				
+			},
+			
+			
+			async getHistoryData(dataList){
+				
+				dataList.forEach((item, index) => {
+					this.formData.message = '正在同步: ' + item.code
+					uniCloud.callFunction({
+							name: 'data-history-cf',
+							data: {
+								type: 'sync',
+								code: item.code,
+								startDate: this.formData.startDate,
+								endDate: this.formData.endDate,
+								batch: this.formData.batch,
+								time: this.formData.time
+							}
+						})
+						.then(res => {
+							console.log('data-history-cf res:', res);
+					
+						});
+					
+				})
 				
 			},
 			
