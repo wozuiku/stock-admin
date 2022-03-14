@@ -40,7 +40,7 @@ exports.main = async (event, context) => {
 	
 	async function syncHistoryData(code, startDate, endDate, batch, time){
 		let csvData = await downloadData(code, startDate, endDate)
-		let historyList = parseCsvData(batch, csvData, time)
+		let historyList = parseData(batch, csvData, time)
 		let result = await insertDataHistory(historyList)
 	}
 	
@@ -53,9 +53,12 @@ exports.main = async (event, context) => {
 		}else{
 			fileUrl = baseUrl + "?code=1" + stockCode + "&start=" + startDate + "&end=" + endDate;
 		}
+		
+		console.log('fileUrl:', fileUrl);
+		
 		//获取数据buffer
 		let csvFileBuffer = await uniCloud.httpclient.request(fileUrl)
-		//将buffer指定根本312编码，并转为字符串
+		//将buffer指定gb2312编码，并转为字符串
 		let csvData = iconv.decode(csvFileBuffer.data, 'gb2312').toString()
 		
 		console.log('csvData:', csvData);
@@ -63,7 +66,7 @@ exports.main = async (event, context) => {
 		return csvData
 	}
 	
-	function parseCsvData(batch, csvData, time){
+	function parseData(batch, csvData, time){
 		let rows = csvData.split('\r\n')
 		let item = {}, historyItem = {}, historyList = [], codeStr =''
 		rows.forEach((row, index) => {

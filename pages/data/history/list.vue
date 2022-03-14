@@ -8,10 +8,12 @@
 					@click="search">{{$t('common.button.search')}}</button>
 				<button class="uni-button" type="primary" size="mini"
 					@click="navigateTo('./add')">{{$t('common.button.sync')}}</button>
-				<button class="uni-button" type="warn" size="mini"
+				<!-- <button class="uni-button" type="warn" size="mini"
 					@click="delTable">{{$t('common.button.batchDelete')}}</button>
 				<button class="uni-button" type="warn" size="mini"
-					@click="delAll">{{$t('common.button.allDelete')}}</button>
+					@click="delAll">{{$t('common.button.allDelete')}}</button> -->
+				<button class="uni-button" type="warn" size="mini"
+					@click="delBatch">{{$t('common.button.batchDelete')}}</button>
 			</view>
 		</view>
 
@@ -85,6 +87,57 @@
 						:total="pagination.count" @change="onPageChanged" />
 				</view>
 			</unicloud-db>
+			
+			<view class="cu-modal" :class="showDelModal?'show':''">
+				<view class="cu-dialog">
+					<view class="cu-bar bg-white justify-end">
+						<view class="content">批量删除</view>
+						<view class="action" @tap="hideModal">
+							<text class="cuIcon-close text-red"></text>
+						</view>
+					</view>
+					<view class="padding-xl">
+						<form>
+							<view class="cu-form-group">
+								<view class="title">同步批次</view>
+								<uni-easyinput v-model="syncBatch"></uni-easyinput>
+							</view>
+							<view class="cu-form-group">
+								<view class="title">股票日期</view>
+								<picker mode="date" :value="stockDate" @change="stockDateChange">
+									<view class="picker">
+										{{stockDate}}
+									</view>
+								</picker>
+							</view>
+							<view class="cu-form-group">
+								<view class="title">股票代码</view>
+								<uni-easyinput v-model="stockCode"></uni-easyinput>
+							</view>
+						</form>
+					</view>
+					<view class="cu-bar bg-white">
+			
+						<view class="del-modal-action">
+							<view class="left">
+								<view class="action">
+									<button class="cu-btn line-red"
+										@click="delDataAll">全部删除</button>
+								</view>
+							</view>
+							<view class="right">
+								<view class="action">
+									
+									<button class="cu-btn bg-blue" 
+										@click="delDataBatch">批量删除</button>
+									
+								</view>
+							</view>
+						</view>
+			
+					</view>
+				</view>
+			</view>
 
 		</view>
 	</view>
@@ -112,6 +165,12 @@
 					pageSize,
 					pageCurrent,
 				},
+				
+				showDelModal: false,
+				syncBatch: '',
+				stockDate: '选择日期',
+				stockCode: '',
+				
 			}
 		},
 
@@ -174,6 +233,15 @@
 			},
 			
 			
+			delBatch() {
+				this.showDelModal = true
+			},
+			
+			hideModal() {
+				this.showDelModal = false
+			},
+			
+			
 			loadData(clear = true) {
 				this.$refs.udb.loadData({
 					clear
@@ -203,12 +271,42 @@
 				})
 			},
 			
-			async delAll(){
+			
+			stockDateChange: function(e) {
+				this.stockDate = e.target.value
+			},
+			
+			async delDataAll(){
 				let res = await db.collection('stock-data-history').where({
 					_id: dbCmd.exists(true)
 				}).remove()
 				
 				this.search()
+			},
+			
+			async delDataBatch(){
+				console.log('syncBatch:', this.syncBatch);
+				console.log('stockDate:', this.stockDate);
+				console.log('stockCode:', this.stockCode);
+				if(this.syncBatch != '' && this.stockDate == '选择日期' && this.stockCode == ''){
+					console.log('按批次删除');
+					let res = await db.collection('stock-data-history').where({
+						batch: dbCmd.eq(this.syncBatch)
+					}).remove()
+				}else if(this.syncBatch == '' && this.stockDate != '选择日期' && this.stockCode == ''){
+					console.log('按日期删除');
+					let res = await db.collection('stock-data-history').where({
+						date: dbCmd.eq(this.stockDate)
+					}).remove()
+				}else if(this.syncBatch == '' && this.stockDate == '选择日期' && this.stockCode != ''){
+					console.log('按代码删除');
+					let res = await db.collection('stock-data-history').where({
+						code: dbCmd.eq(this.stockCode)
+					}).remove()
+				}
+				
+				this.search()
+				
 			},
 
 			// 多选

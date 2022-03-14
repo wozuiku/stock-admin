@@ -1,0 +1,9 @@
+{
+	"name": "data-history-cf",
+	"version": "1.0.0",
+	"description": "同步历史数据",
+	"main": "index.js",
+	"dependencies": {
+		"iconv-lite": "0.6.3"
+	}
+}
