@@ -7,13 +7,13 @@
 				<button class="uni-button" type="default" size="mini"
 					@click="search">{{$t('common.button.search')}}</button>
 				<button class="uni-button" type="primary" size="mini"
-					@click="navigateTo('./add')">{{$t('common.button.sync')}}</button>
+					@click="navigateTo('./add')">同步数据</button>
 				<!-- <button class="uni-button" type="warn" size="mini"
 					@click="delTable">{{$t('common.button.batchDelete')}}</button>
 				<button class="uni-button" type="warn" size="mini"
 					@click="delAll">{{$t('common.button.allDelete')}}</button> -->
 				<button class="uni-button" type="warn" size="mini"
-					@click="delBatch">{{$t('common.button.batchDelete')}}</button>
+					@click="delBatch">批量删除</button>
 			</view>
 		</view>
 
