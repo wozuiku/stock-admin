@@ -8,10 +8,12 @@
 					@click="search">{{$t('common.button.search')}}</button>
 				<button class="uni-button" type="primary" size="mini"
 					@click="batchAddSelect">{{$t('common.button.batchAddSelect')}}</button>
-				<button class="uni-button" type="warn" size="mini"
+				<!-- <button class="uni-button" type="warn" size="mini"
 					@click="delTable">{{$t('common.button.batchDelete')}}</button>
 				<button class="uni-button" type="warn" size="mini"
-					@click="delAll">{{$t('common.button.allDelete')}}</button>
+					@click="delAll">{{$t('common.button.allDelete')}}</button> -->
+				<button class="uni-button" type="warn" size="mini"
+					@click="delBatch">批量删除</button>
 			</view>
 		</view>
 
@@ -67,6 +69,47 @@
 						:total="pagination.count" @change="onPageChanged" />
 				</view>
 			</unicloud-db>
+			
+			<view class="cu-modal" :class="showDelModal?'show':''">
+				<view class="cu-dialog">
+					<view class="cu-bar bg-white justify-end">
+						<view class="content">批量删除</view>
+						<view class="action" @tap="hideModal">
+							<text class="cuIcon-close text-red"></text>
+						</view>
+					</view>
+					<view class="padding-xl">
+						<form>
+							<view class="cu-form-group">
+								<view class="title">执行批次</view>
+								<uni-easyinput v-model="execBatch"></uni-easyinput>
+							</view>
+							
+							
+						</form>
+					</view>
+					<view class="cu-bar bg-white">
+			
+						<view class="del-modal-action">
+							<view class="left">
+								<view class="action">
+									<button class="cu-btn line-red"
+										@click="delDataAll">全部删除</button>
+								</view>
+							</view>
+							<view class="right">
+								<view class="action">
+									
+									<button class="cu-btn bg-blue" 
+										@click="delDataBatch">批量删除</button>
+									
+								</view>
+							</view>
+						</view>
+			
+					</view>
+				</view>
+			</view>
 
 		</view>
 	</view>
@@ -96,6 +139,9 @@
 					pageSize,
 					pageCurrent,
 				},
+				
+				showDelModal: false,
+				execBatch: '',
 			}
 		},
 
@@ -223,21 +269,30 @@
 				return this.selectedIndexs.map(i => dataList[i]._id)
 			},
 			
-			// 批量删除
-			delTable() {
-				this.$refs.udb.remove(this.selectedItems(), {
-					success: (res) => {
-						this.$refs.table.clearSelection()
-					}
-				})
-			},
 			
-			async delAll(){
+			
+			async delDataAll(){
 				let res = await db.collection('stock-strategy-result').where({
 					_id: dbCmd.exists(true)
 				}).remove()
 				
 				this.search()
+			},
+			
+			async delDataBatch(){
+				let res = await db.collection('stock-strategy-result').where({
+					execute_batch: this.execBatch
+				}).remove()
+				
+				this.search()
+			},
+			
+			delBatch() {
+				this.showDelModal = true
+			},
+			
+			hideModal() {
+				this.showDelModal = false
 			},
 			
 			// 多选
