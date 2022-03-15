@@ -36,6 +36,9 @@
 </template>
 
 <script>
+	
+	import strategyDropFunc from './js/drop';
+	
 	const db = uniCloud.database();
 	const dbCmd = db.command;
 	const dbCollectionName = 'stock-strategy-execute';
@@ -126,6 +129,8 @@
 
 				if (this.formData.strategy_code == 'shadow') {
 					this.strategyShadow()
+				}else if(this.formData.strategy_code == 'drop'){
+					strategyDropFunc.strategyDrop(this.formData.execute_batch, this.formData.execute_time)
 				}
 
 				//新增一条执行记录
@@ -175,6 +180,9 @@
 					this.executeProcess = ((1 + i) / totalPage) * 100
 				}
 			},
+			
+			
+			
 
 			//分页获取实时数据
 			async getDataByPage(currentPageNo, lastId, pageSize) {

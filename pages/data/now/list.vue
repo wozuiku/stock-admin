@@ -80,8 +80,6 @@
 				</view>
 			</unicloud-db>
 
-
-
 			<view class="cu-modal" :class="showDelModal?'show':''">
 				<view class="cu-dialog">
 					<view class="cu-bar bg-white justify-end">

@@ -5,5 +5,9 @@
 	"main": "index.js",
 	"dependencies": {
 		"iconv-lite": "0.6.3"
+	},
+	"cloudfunction-config": {
+	    "memorySize": 256,
+	    "timeout": 60
 	}
 }
