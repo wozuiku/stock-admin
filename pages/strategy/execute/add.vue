@@ -130,7 +130,7 @@
 				if (this.formData.strategy_code == 'shadow') {
 					this.strategyShadow()
 				}else if(this.formData.strategy_code == 'drop'){
-					strategyDropFunc.strategyDrop(this.formData.execute_batch, this.formData.execute_time)
+					strategyDropFunc.strategyDrop2(this.formData.execute_batch, this.formData.execute_time)
 				}
 
 				//新增一条执行记录

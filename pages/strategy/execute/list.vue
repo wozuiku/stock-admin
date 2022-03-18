@@ -3,7 +3,7 @@
 		<view class="uni-header">
 			<view class="uni-group">
 				<input class="uni-search" type="text" v-model="query" @confirm="search"
-					:placeholder="$t('common.placeholder.query')" />
+					:placeholder="$t('common.placeholder.query')" :clearable="true"/>
 				<button class="uni-button" type="default" size="mini"
 					@click="search">{{$t('common.button.search')}}</button>
 				<button class="uni-button" type="primary" size="mini"

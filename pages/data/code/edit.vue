@@ -48,7 +48,6 @@
 
 
 		methods: {
-
 			getDetail(id) {
 				uni.showLoading({
 					mask: true
