@@ -21,7 +21,6 @@ export default {
 		//let res = await db.collection('stock-data-history').where('code in ["000012", "000153"] && date >= "2022-03-07"').limit(500).get()
 
 		//console.log('res:', res)
-
 		let res = {},
 			totalCount = 0, //表stock-code总记录数
 			pageSize = 50, //分页查询每页大小
@@ -45,6 +44,7 @@ export default {
 
 		//分页获取股票列表并同步实时数据
 		for (let i = 0; i < totalPage; i++) {
+		//for (let i = 0; i < 1; i++) {
 			console.log('当前分页:', i);
 			//分页获取实时数据
 			pageObj = await this.getStockCodeByPage(i, lastId, pageSize)
@@ -59,10 +59,10 @@ export default {
 			console.log('strategyItemList:', strategyItemList);
 			
 			//将符合策略的股票列表插入到策略结果表
-			await this.insertStrategyResult(strategyItemList, executeBatch, executeTime)
+			if(strategyItemList.length > 0){
+				await this.insertStrategyResult(strategyItemList, executeBatch, executeTime)
+			}
 		}
-
-
 	},
 
 
@@ -214,14 +214,18 @@ export default {
 		let tempItem = historyDataList[0],
 			count = 0,
 			strategyItemList = []
+			
+		//console.log('getStrategyItems2 tempItem0:', tempItem);
 
 		historyDataList.forEach((item, index) => {
 			if (tempItem.code == item.code) {
+				//console.log('getStrategyItems2 item:', item);
 				if (parseFloat(item.close) < parseFloat(item.open)) {
 					count = count + 1
 				}
 			} else {
 				tempItem = item
+				//console.log('getStrategyItems2 tempItem:', tempItem);
 				count = 0
 			}
 			
@@ -264,7 +268,6 @@ export default {
 			code: 'drop'
 		}).orderBy('no', 'asc').get()
 
-		//console.log('res:', res.result.data[0].value);
 		strategy.dropDay = res.result.data[0].value
 
 		return strategy

@@ -10,15 +10,18 @@
 					</picker>
 				</view>
 			</uni-forms-item>
-			<uni-forms-item name="data_batch" label="数据批次">
-				<view class="strategy-picker-box">
-					<picker class="strategy-picker" @change="batchPickerChange" :value="batchIndex" :range="batchPicker">
-						<view class="picker">
-							{{batchIndex>-1?batchPicker[batchIndex]:'点击选择'}}
-						</view>
-					</picker>
-				</view>
-			</uni-forms-item>
+			<view v-if="formData.strategy_code == 'shadow'">
+				<uni-forms-item name="data_batch" label="数据批次">
+					<view class="strategy-picker-box">
+						<picker class="strategy-picker" @change="batchPickerChange" :value="batchIndex" :range="batchPicker">
+							<view class="picker">
+								{{batchIndex>-1?batchPicker[batchIndex]:'点击选择'}}
+							</view>
+						</picker>
+					</view>
+				</uni-forms-item>
+			</view>
+			
 			<uni-forms-item name="execute_batch" label="执行批次">
 				<uni-easyinput v-model="formData.execute_batch" :clearable="true" placeholder="请输入批次" />
 			</uni-forms-item>
@@ -32,18 +35,27 @@
 						class="uni-button">{{$t('common.button.back')}}</button></navigator>
 			</view>
 		</uni-forms>
+	
+		<StrategyDrop ref="drop" @getProcess="changeProcess"></StrategyDrop>
+		
+		
 	</view>
 </template>
 
 <script>
 	
 	import strategyDropFunc from './js/drop';
+	import StrategyDrop from "./strategys/drop.vue";
 	
 	const db = uniCloud.database();
 	const dbCmd = db.command;
 	const dbCollectionName = 'stock-strategy-execute';
 
 	export default {
+		components: {
+			StrategyDrop,
+		},
+		
 		data() {
 			return {
 				formData: {
@@ -65,7 +77,7 @@
 				strategyPicker: [],
 				batchIndex: -1,
 				batchPicker: [],
-				executeProcess: 0
+				executeProcess: ''
 			}
 		},
 
@@ -74,6 +86,10 @@
 		},
 
 		methods: {
+			
+			changeProcess(processValue){
+				this.executeProcess = processValue.toFixed()
+			},
 
 			async init() {
 				//初始化策略选择列表
@@ -130,7 +146,9 @@
 				if (this.formData.strategy_code == 'shadow') {
 					this.strategyShadow()
 				}else if(this.formData.strategy_code == 'drop'){
-					strategyDropFunc.strategyDrop2(this.formData.execute_batch, this.formData.execute_time)
+					//strategyDropFunc.strategyDrop2(this.formData.execute_batch, this.formData.execute_time)
+					this.$refs.drop.strategyDrop(this.formData.execute_batch, this.formData.execute_time);
+					
 				}
 
 				//新增一条执行记录
