@@ -197,55 +197,55 @@
 		"pages": [{
 			"path": "set/list",
 			"style": {
-				"navigationBarTitleText": "设置-列表",
+				"navigationBarTitleText": "策略设置-列表",
 				"navigationStyle": "default"
 			}
 		}, {
 			"path": "set/add",
 			"style": {
-				"navigationBarTitleText": "设置-新增",
+				"navigationBarTitleText": "策略设置-新增",
 				"navigationStyle": "default"
 			}
 		}, {
 			"path": "set/edit",
 			"style": {
-				"navigationBarTitleText": "设置-修改",
+				"navigationBarTitleText": "策略设置-修改",
 				"navigationStyle": "default"
 			}
 		}, {
 			"path": "execute/list",
 			"style": {
-				"navigationBarTitleText": "执行-列表",
+				"navigationBarTitleText": "策略执行-列表",
 				"navigationStyle": "default"
 			}
 		}, {
 			"path": "execute/add",
 			"style": {
-				"navigationBarTitleText": "执行-新增",
+				"navigationBarTitleText": "策略执行-新增",
 				"navigationStyle": "default"
 			}
 		}, {
 			"path": "execute/edit",
 			"style": {
-				"navigationBarTitleText": "执行-编辑",
+				"navigationBarTitleText": "策略执行-编辑",
 				"navigationStyle": "default"
 			}
 		}, {
 			"path": "result/list",
 			"style": {
-				"navigationBarTitleText": "结果-列表",
+				"navigationBarTitleText": "策略结果-列表",
 				"navigationStyle": "default"
 			}
 		}, {
 			"path": "result/add",
 			"style": {
-				"navigationBarTitleText": "结果-新增",
+				"navigationBarTitleText": "策略结果-新增",
 				"navigationStyle": "default"
 			}
 		}, {
 			"path": "result/edit",
 			"style": {
-				"navigationBarTitleText": "结果-编辑",
+				"navigationBarTitleText": "策略结果-编辑",
 				"navigationStyle": "default"
 			}
 		}]

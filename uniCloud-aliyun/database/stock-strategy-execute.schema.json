@@ -20,6 +20,9 @@
 		"strategy_name": {
 			"description": "策略名称"
 		},
+		"execute_params": {
+			"description": "执行参数"
+		},
 		"execute_status": {
 			"description": "执行状态"
 		},

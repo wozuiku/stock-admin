@@ -15,7 +15,7 @@
 
 		<view class="uni-container">
 			<unicloud-db ref="udb" collection="stock-strategy-execute"
-				field="batch,strategy_code,strategy_name,execute_status,execute_message,execute_time" :where="where"
+				field="batch,strategy_code,execute_params,execute_status,execute_time" :where="where"
 				:orderby="orderby" :getcount="true" :page-size="options.pageSize" :page-current="options.pageCurrent"
 				v-slot:default="{data,pagination, loading, error, options}">
 				<uni-table ref="table" :loading="loading" :emptyText="error.message || $t('common.empty')" border stripe
@@ -24,18 +24,16 @@
 					<uni-tr>
 						<uni-th align="center">批次</uni-th>
 						<uni-th align="center">策略代码</uni-th>
-						<uni-th align="center">策略名称</uni-th>
+						<uni-th align="center">执行参数</uni-th>
 						<uni-th align="center">执行状态</uni-th>
-						<uni-th align="center">执行消息</uni-th>
 						<uni-th align="center">执行时间</uni-th>
 						<uni-th align="center">操作</uni-th>
 					</uni-tr>
 					<uni-tr v-for="(item,index) in data" :key="index">
 						<uni-td align="center">{{item.batch}}</uni-td>
 						<uni-td align="center">{{item.strategy_code}}</uni-td>
-						<uni-td align="center">{{item.strategy_name}}</uni-td>
+						<uni-td align="center">{{item.execute_params}}</uni-td>
 						<uni-td align="center">{{item.execute_status}}</uni-td>
-						<uni-td align="center">{{item.execute_message}}</uni-td>
 						<uni-td align="center">{{item.execute_time}}</uni-td>
 						<uni-td align="center">
 							<view class="uni-group">

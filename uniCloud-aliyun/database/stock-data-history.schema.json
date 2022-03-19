@@ -12,40 +12,58 @@
 			"description": "ID，系统自动生成"
 		},
 		"batch": {
-			"description": "batch"
+			"description": "批次"
 		},
 		"code": {
-			"description": "code"
+			"description": "股票代码"
 		},
 		"name": {
-			"description": "name"
+			"description": "名称"
 		},
 		"date": {
-			"description": "date"
+			"description": "日期"
 		},
 		"close": {
-			"description": "close"
+			"description": "收盘价"
 		},
 		"high": {
-			"description": "high"
+			"description": "最高价"
 		},
 		"low": {
-			"description": "low"
+			"description": "最低价"
 		},
 		"open": {
-			"description": "open"
+			"description": "开盘价"
 		},
 		"pre_close": {
-			"description": "pre_close"
+			"description": "前收盘"
+		},
+		"up_down_amount": {
+			"description": "涨跌额"
+		},
+		"up_down_range": {
+			"description": "涨跌幅"
+		},
+		"turn_over_rate": {
+			"description": "换手率"
 		},
 		"bargain_volume": {
-			"description": "bargain_volume"
+			"description": "成交量"
 		},
 		"bargain_amount": {
-			"description": "bargain_amount"
+			"description": "成交金额"
+		},
+		"total_market_value": {
+			"description": "总市值"
+		},
+		"flow_market_value": {
+			"description": "流通市值"
+		},
+		"bargain_ticket_count": {
+			"description": "成交笔数"
 		},
 		"time": {
-			"description": "time"
+			"description": "同步时间"
 		}
 	}
 }

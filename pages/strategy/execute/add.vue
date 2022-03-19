@@ -13,7 +13,8 @@
 			<view v-if="formData.strategy_code == 'shadow'">
 				<uni-forms-item name="data_batch" label="数据批次">
 					<view class="strategy-picker-box">
-						<picker class="strategy-picker" @change="batchPickerChange" :value="batchIndex" :range="batchPicker">
+						<picker class="strategy-picker" @change="batchPickerChange" :value="batchIndex"
+							:range="batchPicker">
 							<view class="picker">
 								{{batchIndex>-1?batchPicker[batchIndex]:'点击选择'}}
 							</view>
@@ -21,12 +22,34 @@
 					</view>
 				</uni-forms-item>
 			</view>
-			
+
+			<view v-if="formData.strategy_code == 'drop'">
+				<uni-forms-item name="date_from" label="开始时间">
+					<view class="strategy-picker-box">
+						<picker mode="date" :value="formData.date_from" @change="dateFromChange">
+							<view class="picker">
+								{{formData.date_from}}
+							</view>
+						</picker>
+					</view>
+				</uni-forms-item>
+
+				<uni-forms-item name="date_end" label="截止时间">
+					<view class="strategy-picker-box">
+						<picker mode="date" :value="formData.date_end" @change="dateEndChange">
+							<view class="picker">
+								{{formData.date_end}}
+							</view>
+						</picker>
+					</view>
+				</uni-forms-item>
+			</view>
+
 			<uni-forms-item name="execute_batch" label="执行批次">
 				<uni-easyinput v-model="formData.execute_batch" :clearable="true" placeholder="请输入批次" />
 			</uni-forms-item>
 			<uni-forms-item name="" label="执行进度">
-				<slider :value="executeProcess"  show-value></slider>
+				<slider :value="executeProcess" show-value></slider>
 			</uni-forms-item>
 			<view class="uni-button-group">
 				<button style="width: 100px;" type="primary" class="uni-button"
@@ -35,18 +58,17 @@
 						class="uni-button">{{$t('common.button.back')}}</button></navigator>
 			</view>
 		</uni-forms>
-	
-		<StrategyDrop ref="drop" @getProcess="changeProcess"></StrategyDrop>
-		
-		
+
+		<StrategyDrop ref="drop" @postProcess="changeProcess"></StrategyDrop>
+
+
 	</view>
 </template>
 
 <script>
-	
 	import strategyDropFunc from './js/drop';
 	import StrategyDrop from "./strategys/drop.vue";
-	
+
 	const db = uniCloud.database();
 	const dbCmd = db.command;
 	const dbCollectionName = 'stock-strategy-execute';
@@ -55,7 +77,7 @@
 		components: {
 			StrategyDrop,
 		},
-		
+
 		data() {
 			return {
 				formData: {
@@ -65,7 +87,9 @@
 					execute_batch: '',
 					execute_status: '',
 					execute_message: '',
-					execute_time: ''
+					execute_time: '',
+					date_from: '选择日期',
+					date_end: '选择日期',
 				},
 				multiArray: [
 					['亚洲', '欧洲'],
@@ -86,14 +110,24 @@
 		},
 
 		methods: {
-			
-			changeProcess(processValue){
+
+			changeProcess(processValue) {
 				this.executeProcess = processValue.toFixed()
+			},
+
+			dateFromChange: function(e) {
+				this.formData.date_from = e.target.value
+			},
+
+			dateEndChange: function(e) {
+				this.formData.date_end = e.target.value
 			},
 
 			async init() {
 				//初始化策略选择列表
-				let res = {}, setList = [], batchList = []
+				let res = {},
+					setList = [],
+					batchList = []
 				res = await db.collection('stock-strategy-set').get()
 				setList = res.result.data
 				setList.forEach((item, index) => {
@@ -104,7 +138,7 @@
 
 				console.log('setList:', setList);
 				console.log('this.strategyPicker:', this.strategyPicker);
-				
+
 				//初始化批次选择列表
 				res = await db.collection('stock-data-now').groupBy('batch').orderBy('batch', 'desc').get()
 				batchList = res.result.data
@@ -121,8 +155,8 @@
 				this.formData.strategy_code = this.strategyPicker[this.strategyIndex]
 				console.log('this.formData.strategy_code:', this.formData.strategy_code);
 			},
-			
-			batchPickerChange(e){
+
+			batchPickerChange(e) {
 				this.batchIndex = e.detail.value
 				this.formData.data_batch = this.batchPicker[this.batchIndex]
 			},
@@ -137,7 +171,7 @@
 					errors
 				} = event.detail
 				console.log('submit value:', value);
-				
+
 				//获取执行批次
 				this.formData.execute_batch = await this.$batch.getBatchNo('EXEC')
 				//获取执行时间
@@ -145,10 +179,11 @@
 
 				if (this.formData.strategy_code == 'shadow') {
 					this.strategyShadow()
-				}else if(this.formData.strategy_code == 'drop'){
+				} else if (this.formData.strategy_code == 'drop') {
 					//strategyDropFunc.strategyDrop2(this.formData.execute_batch, this.formData.execute_time)
-					this.$refs.drop.strategyDrop(this.formData.execute_batch, this.formData.execute_time);
-					
+					this.$refs.drop.strategyDrop(this.formData.execute_batch, this.formData.execute_time, this.formData
+						.date_from, this.formData.date_end);
+
 				}
 
 				//新增一条执行记录
@@ -191,16 +226,16 @@
 					//获取符合策略股票列表
 					strategyItemList = await this.getStrategyItems(dataList)
 					//将符合策略的股票列表插入到策略结果表
-					if(strategyItemList.length > 0){
+					if (strategyItemList.length > 0) {
 						await this.insertStrategyResult(strategyItemList)
 					}
-					
+
 					this.executeProcess = ((1 + i) / totalPage) * 100
 				}
 			},
-			
-			
-			
+
+
+
 
 			//分页获取实时数据
 			async getDataByPage(currentPageNo, lastId, pageSize) {
@@ -239,71 +274,73 @@
 				strategyUpper = this.getDecimal(parseFloat(strategy.upper))
 				strategyBody = this.getDecimal(parseFloat(strategy.body))
 				strategyLower = this.getDecimal(parseFloat(strategy.lower))
-				
+
 				//console.log('getStrategyItems 1');
 
 				dataList.forEach((item, index) => {
 					code = item.code
 					name = item.name
-					
+
 					high = this.getDecimal(parseFloat(item.high))
-					low =  this.getDecimal(parseFloat(item.low))
+					low = this.getDecimal(parseFloat(item.low))
 					open = this.getDecimal(parseFloat(item.open))
 					price = this.getDecimal(parseFloat(item.price))
-					
-					
+
+
 
 					if (price >= open) {
 						console.log('if');
 						itemUpper = this.getDecimal(high - price)
 						itemBody = this.getDecimal(price - open)
-						itemLower = this.getDecimal(open - low) 
-						itemLength = this.getDecimal(high - low)   
+						itemLower = this.getDecimal(open - low)
+						itemLength = this.getDecimal(high - low)
 					} else {
 						console.log('else');
 						itemUpper = this.getDecimal(high - open)
-						itemBody = this.getDecimal(open - price) 
+						itemBody = this.getDecimal(open - price)
 						itemLower = this.getDecimal(price - low)
-						itemLength = this.getDecimal(high - low)   
+						itemLength = this.getDecimal(high - low)
 					}
-					
-					itemLowerPercent = this.getDecimal(itemLower / itemLength) 
-					strategyLowerPercent = this.getDecimal(strategyLower / strategyLength)  
-					
+
+					itemLowerPercent = this.getDecimal(itemLower / itemLength)
+					strategyLowerPercent = this.getDecimal(strategyLower / strategyLength)
+
 					if (itemLowerPercent >= strategyLowerPercent) {
-						
+
 						strategyItemList.push(item)
 					}
 				})
-				
+
 				return strategyItemList
 			},
-			
+
 			//将浮点数四舍五入保留两位小数
-			getDecimal(floatNum){
+			getDecimal(floatNum) {
 				return Math.round(floatNum * 100) / 100
 			},
 
 
 			async insertStrategyExecute() {
-				
+
 				//console.log('insertStrategyExecute 1');
 				let strategyExecute = {}
 
 				strategyExecute.batch = this.formData.execute_batch
 				strategyExecute.strategy_code = this.formData.strategy_code
-				strategyExecute.execute_time = this.formData.execute_time
 				
+				strategyExecute.execute_params = this.formData.date_from + ', ' + this.formData.date_end
+				strategyExecute.execute_time = this.formData.execute_time
+
 				//console.log('insertStrategyExecute 2');
 
 				await db.collection('stock-strategy-execute').add(strategyExecute)
-				
+
 				//console.log('insertStrategyExecute 3');
 			},
 
 
 			async insertStrategyResult(strategyItemList) {
-				
+
 				//console.log('insertStrategyResult 1');
 				let strategyResultItem = {},
 					strategyResultList = [],
@@ -320,12 +357,12 @@
 					strategyResultItem.execute_time = this.formData.execute_time
 					strategyResultList.push(strategyResultItem)
 				})
-				
+
 				//console.log('insertStrategyResult 2');
 				//console.log('insertStrategyResult strategyResultList:', strategyResultList);
 
 				res = await db.collection('stock-strategy-result').add(strategyResultList)
-				
+
 				//console.log('insertStrategyResult 3');
 				//console.log('insertStrategyResult res:', res);
 			},
@@ -394,11 +431,7 @@
 		display: flex;
 		align-items: center;
 		height: 36px;
-		
-		
+
+
 	}
 </style>
-
-
-
-
