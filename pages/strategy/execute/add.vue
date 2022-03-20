@@ -178,7 +178,7 @@
 				} else if (this.formData.strategy_code == 'drop') {
 					//strategyDropFunc.strategyDrop2(this.formData.execute_batch, this.formData.execute_time)
 					this.formData.execute_params = this.formData.date_from + ', ' + this.formData.date_end
-					await this.$refs.drop.strategyDrop(this.formData.execute_batch, this.formData.execute_time, this.formData
+					await this.$refs.drop.strategyDrop(this.formData.execute_batch, this.formData.execute_params, this.formData.execute_time, this.formData
 						.date_from, this.formData.date_end);
 
 				}
