@@ -61,11 +61,21 @@
 					//将符合策略的股票列表插入到策略结果表
 					if(strategyItemList.length > 0){
 						await this.insertStrategyResult(strategyItemList, executeBatch, executeTime)
+						
 					}
 					
 					this.executeProcess = ((1 + i) / totalPage) * 100
 					this.$emit('postProcess', this.executeProcess)
+					
+					
 				}
+				
+				if(this.executeProcess == 100){
+					this.$emit('postStatus', 'S')
+				}else{
+					this.$emit('postStatus', 'E')
+				}
+				
 			},
 			
 			async getStrategy() {

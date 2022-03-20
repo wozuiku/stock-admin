@@ -59,8 +59,8 @@
 			</view>
 		</uni-forms>
 
-		<StrategyShadow ref="shadow" @postProcess="changeProcess"></StrategyShadow>
-		<StrategyDrop ref="drop" @postProcess="changeProcess"></StrategyDrop>
+		<StrategyShadow ref="shadow" @postProcess="changeProcess" @postStatus="changeStatus"></StrategyShadow>
+		<StrategyDrop ref="drop" @postProcess="changeProcess" @postStatus="changeStatus"></StrategyDrop>
 
 	</view>
 </template>
@@ -82,9 +82,9 @@
 		data() {
 			return {
 				formData: {
-					data_batch: '',
 					strategy_code: '',
 					strategy_name: '',
+					data_batch: '',
 					execute_batch: '',
 					execute_status: '',
 					execute_message: '',
@@ -102,7 +102,8 @@
 				strategyPicker: [],
 				batchIndex: -1,
 				batchPicker: [],
-				executeProcess: ''
+				executeProcess: '',
+				executeStatus: ''
 			}
 		},
 
@@ -168,11 +169,11 @@
 
 				if (this.formData.strategy_code == 'shadow') {
 					//this.strategyShadow()
-					this.$refs.shadow.strategyShadow(this.formData.strategy_code, this.formData.data_batch, this
+					await this.$refs.shadow.strategyShadow(this.formData.strategy_code, this.formData.data_batch, this
 						.formData.execute_batch, this.formData.execute_time);
 				} else if (this.formData.strategy_code == 'drop') {
 					//strategyDropFunc.strategyDrop2(this.formData.execute_batch, this.formData.execute_time)
-					this.$refs.drop.strategyDrop(this.formData.execute_batch, this.formData.execute_time, this.formData
+					await this.$refs.drop.strategyDrop(this.formData.execute_batch, this.formData.execute_time, this.formData
 						.date_from, this.formData.date_end);
 
 				}
@@ -191,8 +192,21 @@
 				strategyExecute.batch = this.formData.execute_batch
 				strategyExecute.strategy_code = this.formData.strategy_code
 
-				strategyExecute.execute_params = this.formData.date_from + ', ' + this.formData.date_end
+				
+				
+				if (this.formData.strategy_code == 'shadow') {
+					strategyExecute.execute_params = this.formData.data_batch
+				} else if (this.formData.strategy_code == 'drop') {
+					strategyExecute.execute_params = this.formData.date_from + ', ' + this.formData.date_end
+				}
+				
+				
+				
 				strategyExecute.execute_time = this.formData.execute_time
+				
+				console.log('insertStrategyExecute this.executeStatus:', this.executeStatus);
+				
+				strategyExecute.execute_status = this.executeStatus
 
 				//console.log('insertStrategyExecute 2');
 
@@ -230,6 +244,12 @@
 			
 			changeProcess(processValue) {
 				this.executeProcess = processValue.toFixed()
+			},
+			
+			changeStatus(statusValue) {
+				
+				this.executeStatus = statusValue
+				console.log('changeStatus this.executeStatus:', this.executeStatus);
 			},
 			
 			dateFromChange: function(e) {
