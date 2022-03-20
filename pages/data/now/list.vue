@@ -6,10 +6,12 @@
 					:placeholder="$t('common.placeholder.query')" />
 				<button class="uni-button" type="default" size="mini"
 					@click="search">{{$t('common.button.search')}}</button>
-				<button class="uni-button" type="primary" size="mini" :loading="syncLoading"
-					@click="sync">{{syncBtnText}}</button>
+				<!-- <button class="uni-button" type="primary" size="mini" :loading="syncLoading"
+					@click="sync">{{syncBtnText}}</button> -->
+				<button class="uni-button" type="primary" size="mini"
+						@click="navigateTo('./add')">同步数据</button>
 				<button class="uni-button" type="warn" size="mini"
-					@click="delBatch">{{$t('common.button.batchDelete')}}</button>
+					@click="delBatch">批量删除</button>
 				<!-- #ifdef H5 -->
 				<download-excel class="hide-on-phone" :fields="exportExcel.fields" :data="exportExcelData"
 					:type="exportExcel.type" :name="exportExcel.filename">
@@ -381,6 +383,18 @@
 				this.$refs.table.clearSelection()
 				this.$refs.udb.loadData({
 					current: e.current
+				})
+			},
+			
+			navigateTo(url, clear) {
+				
+				uni.navigateTo({
+					url,
+					events: {
+						refreshData: () => {
+							this.loadData(clear)
+						}
+					}
 				})
 			},
 

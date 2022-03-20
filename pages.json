@@ -191,6 +191,12 @@
 				"navigationBarTitleText": "实时数据管理",
 				"navigationStyle": "default"
 			}
+		}, {
+			"path": "now/add",
+			"style": {
+				"navigationBarTitleText": "同步实时数据",
+				"navigationStyle": "default"
+			}
 		}]
 	}, {
 		"root": "pages/strategy",
