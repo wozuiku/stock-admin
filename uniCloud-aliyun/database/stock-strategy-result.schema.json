@@ -14,8 +14,8 @@
 		"execute_batch": {
 			"description": "执行批次"
 		},
-		"data_batch": {
-			"description": "数据批次"
+		"execute_params": {
+			"description": "执行参数"
 		},
 		"strategy_code": {
 			"description": "策略代码"

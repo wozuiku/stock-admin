@@ -84,11 +84,12 @@
 				formData: {
 					strategy_code: '',
 					strategy_name: '',
-					data_batch: '',
 					execute_batch: '',
+					execute_params: '',
+					execute_time: '',
 					execute_status: '',
 					execute_message: '',
-					execute_time: '',
+					data_batch: '',
 					date_from: '选择日期',
 					date_end: '选择日期',
 				},
@@ -169,10 +170,14 @@
 
 				if (this.formData.strategy_code == 'shadow') {
 					//this.strategyShadow()
+					
+					this.formData.execute_params = this.formData.data_batch
+					
 					await this.$refs.shadow.strategyShadow(this.formData.strategy_code, this.formData.data_batch, this
-						.formData.execute_batch, this.formData.execute_time);
+						.formData.execute_batch, this.formData.execute_params, this.formData.execute_time);
 				} else if (this.formData.strategy_code == 'drop') {
 					//strategyDropFunc.strategyDrop2(this.formData.execute_batch, this.formData.execute_time)
+					this.formData.execute_params = this.formData.date_from + ', ' + this.formData.date_end
 					await this.$refs.drop.strategyDrop(this.formData.execute_batch, this.formData.execute_time, this.formData
 						.date_from, this.formData.date_end);
 

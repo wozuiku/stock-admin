@@ -14,7 +14,7 @@
 		
 		methods:{
 			
-			async strategyDrop(executeBatch, executeTime, dropDateFrom, dropDateEnd) {
+			async strategyDrop(executeBatch, executeParams, executeTime, dropDateFrom, dropDateEnd) {
 				let strategy = {},
 					dropDayCount//, dropDateFrom = ''
 				strategy = await this.getStrategy()
@@ -60,14 +60,12 @@
 					
 					//将符合策略的股票列表插入到策略结果表
 					if(strategyItemList.length > 0){
-						await this.insertStrategyResult(strategyItemList, executeBatch, executeTime)
+						await this.insertStrategyResult(strategyItemList, executeBatch, executeParams, executeTime)
 						
 					}
 					
 					this.executeProcess = ((1 + i) / totalPage) * 100
 					this.$emit('postProcess', this.executeProcess)
-					
-					
 				}
 				
 				if(this.executeProcess == 100){
@@ -170,7 +168,7 @@
 			},
 			
 			
-			async insertStrategyResult(strategyItemList, executeBatch, executeTime) {
+			async insertStrategyResult(strategyItemList, executeBatch, executeParams, executeTime) {
 			
 				let strategyResultItem = {},
 					strategyResultList = [],
@@ -183,6 +181,7 @@
 					strategyResultItem.stock_code = item.code
 					strategyResultItem.stock_name = item.name
 					strategyResultItem.stock_date = item.date
+					strategyResultItem.execute_params = executeParams
 					strategyResultItem.execute_time = executeTime
 					strategyResultList.push(strategyResultItem)
 				})

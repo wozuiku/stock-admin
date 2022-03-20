@@ -19,17 +19,16 @@
 
 		<view class="uni-container">
 			<unicloud-db ref="udb" collection="stock-strategy-result"
-				field="execute_batch,data_batch,strategy_code,strategy_name,stock_code,stock_name,stock_date,execute_time" :where="where"
+				field="strategy_code, execute_batch,execute_params,strategy_name,stock_code,stock_name,stock_date,execute_time" :where="where"
 				:orderby="orderby" :getcount="true" :page-size="options.pageSize" :page-current="options.pageCurrent"
 				v-slot:default="{data,pagination, loading, error, options}">
 				<uni-table ref="table" :loading="loading" :emptyText="error.message || $t('common.empty')" border stripe
 					type="selection" @selection-change="selectionChange">
 
 					<uni-tr>
-						<uni-th align="center">执行批次</uni-th>
-						<uni-th align="center">数据批次</uni-th>
 						<uni-th align="center">策略代码</uni-th>
-						<uni-th align="center">策略名称</uni-th>
+						<uni-th align="center">执行批次</uni-th>
+						<uni-th align="center">执行参数</uni-th>
 						<uni-th align="center">股票代码</uni-th>
 						<uni-th align="center">股票名称</uni-th>
 						<uni-th align="center">股票日期</uni-th>
@@ -37,10 +36,9 @@
 						<uni-th align="center">操作</uni-th>
 					</uni-tr>
 					<uni-tr v-for="(item,index) in data" :key="index">
-						<uni-td align="center">{{item.execute_batch}}</uni-td>
-						<uni-td align="center">{{item.data_batch}}</uni-td>
 						<uni-td align="center">{{item.strategy_code}}</uni-td>
-						<uni-td align="center">{{item.strategy_name}}</uni-td>
+						<uni-td align="center">{{item.execute_batch}}</uni-td>
+						<uni-td align="center">{{item.execute_params}}</uni-td>
 						<uni-td align="center">{{item.stock_code}}</uni-td>
 						<uni-td align="center">{{item.stock_name}}</uni-td>
 						<uni-td align="center">{{item.stock_date}}</uni-td>

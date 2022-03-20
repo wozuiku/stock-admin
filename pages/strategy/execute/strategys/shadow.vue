@@ -14,7 +14,7 @@
 		
 		methods:{
 			//执行长下影线策略
-			async strategyShadow(strategyCode, dataBatch, executeBatch, executeTime) {
+			async strategyShadow(strategyCode, dataBatch, executeBatch, executeParams, executeTime) {
 				let res = {},
 					totalCount = 0, //表stock-code总记录数
 					pageSize = 500, //分页查询每页大小
@@ -50,14 +50,12 @@
 					strategyItemList = await this.getStrategyItems(strategyCode, dataList)
 					//将符合策略的股票列表插入到策略结果表
 					if (strategyItemList.length > 0) {
-						await this.insertStrategyResult(strategyCode, dataBatch, executeBatch, executeTime, strategyItemList)
+						await this.insertStrategyResult(strategyCode, executeBatch, executeParams, executeTime, strategyItemList)
 						
 					}
 					
 					this.executeProcess = ((1 + i) / totalPage) * 100
 					this.$emit('postProcess', this.executeProcess)
-			
-					
 				}
 				if(this.executeProcess == 100){
 					this.$emit('postStatus', 'S')
@@ -148,7 +146,7 @@
 				return Math.round(floatNum * 100) / 100
 			},
 			
-			async insertStrategyResult(strategyCode, dataBatch, executeBatch, executeTime, strategyItemList) {
+			async insertStrategyResult(strategyCode, executeBatch, executeParams, executeTime, strategyItemList) {
 			
 				//console.log('insertStrategyResult 1');
 				let strategyResultItem = {},
@@ -158,7 +156,7 @@
 				strategyItemList.forEach((item, index) => {
 					strategyResultItem = {}
 					strategyResultItem.execute_batch = executeBatch
-					strategyResultItem.data_batch = dataBatch
+					strategyResultItem.execute_params = executeParams
 					strategyResultItem.strategy_code = strategyCode
 					strategyResultItem.stock_code = item.code.substr(1, item.code.length)
 					strategyResultItem.stock_name = item.name
