@@ -2,7 +2,7 @@
 	<view class="uni-container">
 		<uni-forms ref="form" v-model="formData" @submit="submit">
 			<uni-forms-item name="code" label="股票代码">
-				<uni-easyinput v-model="formData.code" :clearable="true" />
+				<uni-easyinput v-model="formData.code" :clearable="true"/>
 			</uni-forms-item>
 			<uni-forms-item name="startDate" label="开始时间">
 				<view class="picker-box">
@@ -65,6 +65,7 @@
 		methods: {
 
 			init() {
+				this.formData.code = '601318'
 				this.formData.startDate = this.getDate()
 				this.formData.endDate = this.getDate()
 			},
@@ -88,10 +89,21 @@
 				console.log('submit value:', value);
 
 				let historyDataList = await this.getHistoryData(this.formData.code, this.formData.startDate, this.formData.endDate)
-				this.validateHistoryData(historyDataList, this.formData.startDate, this.formData.endDate)
+				let validateMessageList = this.validateHistoryData(historyDataList, this.formData.startDate, this.formData.endDate)
+				console.log('validateMessageList:', validateMessageList);
+				this.validateMsg = ''
+				if(validateMessageList.length == 0){
+					this.validateMsg = '校验通过'
+				}else {
+					validateMessageList.forEach((item, index) => {
+						this.validateMsg += 'date:' + item.date + ' count:' + item.count
+					})
+				}
+				
+				
 			},
 
-			//分页获取实时数据
+			//获取历史数据
 			async getHistoryData(code, startDate, endDate) {
 				let res = {},
 					sqlWhere = '',
@@ -107,28 +119,40 @@
 			},
 			
 			validateHistoryData(historyDataList, startDate, endDate){
-				let dayCount = this.getDateCount(startDate, endDate)
+				let dayCount = this.getDateCount(startDate, endDate), dataCount = 0, messageList = [], messageItem = {}
+				
 				
 				for(let i = 0; i <= dayCount; i++){
 					let date = this.getDateFrom(startDate, i)
+					dataCount = 0
 					if(this.isWeekenDay(date)){
 						console.log('date:', date);
-						this.getDataCount(historyDataList, date)
+						dataCount = this.getDataCount(historyDataList, date)
+						if(dataCount != 1){
+							messageItem.date = date
+							messageItem.count = dataCount
+							messageList.push(messageItem)
+						}
+					}
+					
+					if(i < dayCount){
+						this.process = (((1 + i) / dayCount) * 100).toFixed()
 					}
 					
 				}
 				
-				console.log('validateHistoryData dayCount:', dayCount);
-				
-				
-				
+				return messageList
 			},
 			
 			getDataCount(historyDataList, date){
+				let count = 0
 				historyDataList.forEach((item, index) => {
-					console.log('item:', item);
+					
+					if(date == item.date){
+						count += 1
+					}
 				})
-				
+				return count
 			},
 
 			startDateChange(e) {
@@ -211,6 +235,7 @@
 		height: 120px;
 		background-color: #FFF;
 		border: 1px solid #c8c7cc;
+		color: red
 
 	}
 </style>
