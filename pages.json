@@ -173,7 +173,7 @@
 				"navigationBarTitleText": "历史数据管理",
 				"navigationStyle": "default"
 			}
-		}, {
+		},{
 			"path": "history/add",
 			"style": {
 				"navigationBarTitleText": "同步历史数据",
@@ -183,6 +183,12 @@
 			"path": "history/edit",
 			"style": {
 				"navigationBarTitleText": "修改历史数据",
+				"navigationStyle": "default"
+			}
+		},{
+			"path": "history/validate",
+			"style": {
+				"navigationBarTitleText": "校验历史数据",
 				"navigationStyle": "default"
 			}
 		}, {
@@ -195,6 +201,12 @@
 			"path": "now/add",
 			"style": {
 				"navigationBarTitleText": "同步实时数据",
+				"navigationStyle": "default"
+			}
+		},{
+			"path": "now/validate",
+			"style": {
+				"navigationBarTitleText": "校验实时数据",
 				"navigationStyle": "default"
 			}
 		}]

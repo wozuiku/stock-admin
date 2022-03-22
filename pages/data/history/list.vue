@@ -8,6 +8,8 @@
 					@click="search">{{$t('common.button.search')}}</button>
 				<button class="uni-button" type="primary" size="mini"
 					@click="navigateTo('./add')">同步数据</button>
+				<button class="uni-button" type="primary" size="mini"
+					@click="navigateTo('./validate')">数据校验</button>
 				<!-- <button class="uni-button" type="warn" size="mini"
 					@click="delTable">{{$t('common.button.batchDelete')}}</button>
 				<button class="uni-button" type="warn" size="mini"

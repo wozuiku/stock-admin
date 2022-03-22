@@ -43,6 +43,10 @@
 						</picker>
 					</view>
 				</uni-forms-item>
+				
+				<uni-forms-item name="drop_day" label="下跌天数">
+					<uni-easyinput v-model="formData.drop_day" :clearable="true" />
+				</uni-forms-item>
 			</view>
 
 			<uni-forms-item name="execute_batch" label="执行批次">
@@ -92,6 +96,7 @@
 					data_batch: '',
 					date_from: '选择日期',
 					date_end: '选择日期',
+					drop_day: ''
 				},
 				multiArray: [
 					['亚洲', '欧洲'],
@@ -177,9 +182,9 @@
 						.formData.execute_batch, this.formData.execute_params, this.formData.execute_time);
 				} else if (this.formData.strategy_code == 'drop') {
 					//strategyDropFunc.strategyDrop2(this.formData.execute_batch, this.formData.execute_time)
-					this.formData.execute_params = this.formData.date_from + ', ' + this.formData.date_end
+					this.formData.execute_params = this.formData.date_from + ', ' + this.formData.date_end + ', ' + this.formData.drop_day
 					await this.$refs.drop.strategyDrop(this.formData.execute_batch, this.formData.execute_params, this.formData.execute_time, this.formData
-						.date_from, this.formData.date_end);
+						.date_from, this.formData.date_end, this.formData.drop_day);
 
 				}
 

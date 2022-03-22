@@ -14,13 +14,13 @@
 		
 		methods:{
 			
-			async strategyDrop(executeBatch, executeParams, executeTime, dropDateFrom, dropDateEnd) {
-				let strategy = {},
-					dropDayCount//, dropDateFrom = ''
-				strategy = await this.getStrategy()
-				dropDayCount = parseInt(strategy.dropDayCount)
+			async strategyDrop(executeBatch, executeParams, executeTime, dropDateFrom, dropDateEnd, dropDayCount) {
+				// let strategy = {},
+				// 	dropDayCount
+				// strategy = await this.getStrategy()
+				dropDayCount = parseInt(dropDayCount)
 				//dropDateFrom = this.getDropDateFrom(dropDateEnd, dropDayCount)
-				console.log('strategy:', strategy, 'dropDayCount:', dropDayCount, 'dropDateFrom:', dropDateFrom, 'dropDateEnd:', dropDateEnd)
+				console.log('strategy:', 'drop', 'dropDayCount:', dropDayCount, 'dropDateFrom:', dropDateFrom, 'dropDateEnd:', dropDateEnd)
 			
 				let res = {},
 					totalCount = 0, //表stock-code总记录数
